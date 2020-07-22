@@ -48,12 +48,10 @@ setup(
     extras_require={
         'dev': [
             'flake8',
+            'cookiecutter',
         ],
         'test': [
             'pytest',
-        ],
-        'tox': [
-            'flake8',
         ],
     }
 )
