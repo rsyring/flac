@@ -1,9 +1,11 @@
-import click
+import pathlib
 
+import click
 import flask
 import flask.cli
 
 import flac.database
+import flac.config
 
 
 @click.command()
@@ -20,11 +22,27 @@ def db_init(drop_first, for_tests):
     flac.database.create_db(sa_url, drop_first)
 
 
+@click.command()
+@flask.cli.with_appcontext
+def config_info():
+    """ Show config info """
+    app = flask.current_app
+    print(f'app.name: {app.name}')
+    print(f'app.env: {app.env}')
+
+    print('Config file paths:')
+    for fpath in flac.config.app_config_fpaths(app):
+        fpath = pathlib.Path(fpath)
+        status = 'exists' if fpath.exists() else 'missing'
+        print(f'    {fpath}: {status}')
+
+
 class FlacGroup(flask.cli.FlaskGroup):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add_command(db_init)
+        self.add_command(config_info)
 
 
 def cli_entry(flac_app_cls):
