@@ -1,9 +1,9 @@
 import os.path as osp
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
 cdir = osp.abspath(osp.dirname(__file__))
-README = open(osp.join(cdir, 'readme.md')).read()
+README = open(osp.join(cdir, 'README.md')).read()
 CHANGELOG = ''  # open(osp.join(cdir, 'changelog.rst')).read()
 
 version_fpath = osp.join(cdir, 'flac', 'version.py')
@@ -15,12 +15,12 @@ with open(version_fpath) as fo:
 setup(
     name='flac',
     version=version_globals['VERSION'],
-    description='FLAsk CLI library',
+    description='Flask CLI library',
     long_description='\n\n'.join((README, CHANGELOG)),
     long_description_content_type='text/markdown',
     author='Randy Syring',
     author_email='randy.syring@level12.io',
-    url='https://github.com/level12/keg-auth',
+    url='https://github.com/rsyring/flac',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
@@ -28,7 +28,7 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
     ],
-    packages=find_packages(exclude=[]),
+    packages=find_namespace_packages(exclude=[]),
     include_package_data=True,
     zip_safe=False,
     install_requires=[
