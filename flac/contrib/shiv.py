@@ -1,4 +1,5 @@
 import logging
+import os
 import pathlib
 import subprocess
 import shutil
@@ -6,11 +7,28 @@ import sys
 
 log = logging.getLogger(__name__)
 
+SHIV_STDERR_DEBUG = 'SHIV_STDERR_DEBUG' in os.environ
+
+
+def log_debug(msg):
+    """ Log to stderr based on environment variable
+
+        The preamble will usually get called so early in the process setup that nothing else will
+        have had a chance to run yet, not even code that sets up Python logging.  This permits
+        logging to stderr if the environment variable SHIV_STDERR_DEBUG has been set.
+
+        But, we also pass the value on to the Python logging library in case the normal logging
+        faculties have been used.
+    """
+    log.debug(msg)
+    if SHIV_STDERR_DEBUG:
+        print(msg, file=sys.stderr)
+
 
 def auto_cleanup():
     env, site_packages_dpath = shiv_info_callstack()
     if env is None:
-        log.debug('shiv environment not detected')
+        log_debug('shiv environment not detected')
         return
     cleanup_shivs(env, site_packages_dpath)
 
@@ -46,7 +64,7 @@ def cleanup_shivs(env, site_packages_dpath):
                 or not dpath.is_dir():
             continue
 
-        log.debug(f'Deleting {dpath} and lock file')
+        log_debug(f'Deleting {dpath} and lock file')
         shutil.rmtree(dpath)
 
         lock_fpath = pathlib.Path(cache_root_dpath, f'.{dpath.stem}_lock')
@@ -94,5 +112,5 @@ def build(scripts_dpath, app_name, pybin, is_full, pyz_name=None):
         '--python', f'/usr/bin/env {pybin}',
         '--output-file', pyz_fpath,
         '--entry-point', f'{app_name}.app:cli',
-        # '--preamble', preamble_fpath,
+        '--preamble', preamble_fpath,
     )
