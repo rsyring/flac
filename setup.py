@@ -34,6 +34,7 @@ setup(
     install_requires=[
         'appdirs',
         'arrow',
+        'blazeutils',
         'flask',
         'flask_sqlalchemy',
         'psycopg2-binary',
