@@ -22,7 +22,7 @@ def db_init(drop_first, for_tests):
     flac.database.create_db(sa_url, drop_first)
 
 
-@click.cli.command()
+@click.command()
 def db_tables():
     """ Create new DB tables """
     from .ext import db
