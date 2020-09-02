@@ -1,3 +1,6 @@
 # These are the requirements needed to do development work on this project in addition to running
 # the tests
 -r common.txt
+
+# for viewing GH flavored markdown
+grip

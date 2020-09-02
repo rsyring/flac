@@ -1,8 +1,8 @@
 Jax
 ====
 
-[![CircleCI](https://circleci.com/gh/rsyring/jax.svg?style=svg)](https://circleci.com/gh/rsyring/jax)
-[![codecov](https://codecov.io/gh/rsyring/jax/branch/master/graph/badge.svg)](https://codecov.io/gh/rsyring/jax)
+[![CircleCI](https://circleci.com/gh/{{ cookiecutter.gh_repo_path }}.svg?style=svg)](https://circleci.com/gh/{{ cookiecutter.gh_repo_path }})
+[![codecov](https://codecov.io/gh/{{ cookiecutter.gh_repo_path }}/branch/master/graph/badge.svg)](https://codecov.io/gh/{{ cookiecutter.gh_repo_path }})
 
 
 
