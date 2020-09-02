@@ -17,4 +17,4 @@ class TestCLI:
         result = subprocess.run(args, capture_output=True)
 
         assert result.stdout == b'Hello, World!\n', result.stderr
-        assert b'DEBUG - jax.cli - cli debug logging example' in result.stderr
+        assert b'DEBUG - {{cookiecutter.project_namespace}}.cli - cli debug logging example' in result.stderr

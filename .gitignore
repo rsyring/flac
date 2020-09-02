@@ -5,3 +5,4 @@
 coverage.xml
 .ci/test-reports
 dist
+build

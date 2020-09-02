@@ -11,7 +11,6 @@ version_globals = {}
 with open(version_fpath) as fo:
     exec(fo.read(), version_globals)
 
-
 setup(
     name='flac',
     version=version_globals['VERSION'],
@@ -28,7 +27,8 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
     ],
-    packages=find_namespace_packages(exclude=[]),
+    packages=find_namespace_packages(include=['flac.*']),
+    py_modules=['flac_cc'],
     include_package_data=True,
     zip_safe=False,
     install_requires=[
@@ -54,5 +54,10 @@ setup(
         'test': [
             'pytest',
         ],
-    }
+    },
+    entry_points={
+        'console_scripts': [
+            'flac-cc=flac_cc:cli'
+        ],
+    },
 )

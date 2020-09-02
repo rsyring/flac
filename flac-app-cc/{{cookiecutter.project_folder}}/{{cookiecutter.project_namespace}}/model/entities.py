@@ -1,4 +1,4 @@
-from jax.ext import db
+from {{cookiecutter.project_namespace}}.ext import db
 
 
 class Post(db.Model):

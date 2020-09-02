@@ -1,5 +1,6 @@
 # app
 appdirs
+{{ cookiecutter.flac_req_spec }}
 flask
 flask_sqlalchemy
 psycopg2-binary
@@ -11,6 +12,3 @@ sqlalchemy_utils
 pytest
 pytest-cov
 flake8
-
-# dev environment
-pip-tools
