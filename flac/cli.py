@@ -22,6 +22,13 @@ def db_init(drop_first, for_tests):
     flac.database.create_db(sa_url, drop_first)
 
 
+@click.cli.command()
+def db_tables():
+    """ Create new DB tables """
+    from .ext import db
+    db.create_all()
+
+
 @click.command()
 @flask.cli.with_appcontext
 def config_info():
