@@ -10,7 +10,7 @@ outputs := $(objects:.in=.txt)
 all: $(outputs)
 
 %.txt: %.in
-	pip-compile -v --output-file $@ $<
+	pip-compile --quiet --output-file $@ $<
 
 # Dependency chain
 dev.txt: common.txt
