@@ -8,9 +8,10 @@
     "db_postgres_version": "12",
     "python_tox": "py{{cookiecutter.python_version|replace('.', '') }}",
     "python_executable": "python{{cookiecutter.python_version}}",
-    "flac_req_spec": "-e git+https://github.com/rsyring/flac#egg=flac",
+    "flac_req_spec": "git+https://github.com/rsyring/flac#egg=flac",
     "gh_repo_org": "",
     "gh_repo_name": "{{ cookiecutter.project_dashed }}",
+    "gh_repo_path": "{{ cookiecutter.gh_repo_org }}/{{ cookiecutter.gh_repo_name }}",
     "circle_badge_token": "",
     "codecov_api_token": "",
     "codecov_badge_token": ""
