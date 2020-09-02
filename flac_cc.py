@@ -25,7 +25,8 @@ def create(target_dpath, run_tests, no_input, overwrite, flac_rec_local):
         extra_context['flac_req_spec'] = f'-e {flac_proj_dpath}'
 
     result_dpath = cookiecutter(
-        str(cc_dpath), output_dir=target_dpath, no_input=no_input, overwrite_if_exists=overwrite
+        str(cc_dpath), output_dir=target_dpath, no_input=no_input, overwrite_if_exists=overwrite,
+        extra_context=extra_context
     )
     result_dpath = pathlib.Path(result_dpath)
     print('created project at:', result_dpath)
