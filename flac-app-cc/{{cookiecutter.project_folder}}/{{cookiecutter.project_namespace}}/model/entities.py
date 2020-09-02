@@ -1,4 +1,3 @@
-from flac.contrib.sqlalchemy import MethodsMixin
 import sqlalchemy as sa
 from sqlalchemy import orm
 
