@@ -1,6 +1,8 @@
+from flac.contrib.sqlalchemy import MethodsMixin
 import sqlalchemy as sa
 from sqlalchemy import orm
 
+from .utils import EntityMixin
 from {{cookiecutter.project_namespace}}.ext import db
 
 # Default cascade setting for parent/child relationships.  Should get set on parent side.
@@ -8,8 +10,9 @@ from {{cookiecutter.project_namespace}}.ext import db
 _rel_cascade = 'all, delete-orphan'
 
 
-class Post(db.Model):
-    id = sa.Column(sa.Integer, primary_key=True)
+class Post(EntityMixin, db.Model):
+    __tablename__ = 'posts'
+
     title = sa.Column(sa.String, nullable=False)
     author = sa.Column(sa.String, nullable=False)
     body = sa.Column(sa.String, nullable=False)
@@ -17,22 +20,12 @@ class Post(db.Model):
     comments = orm.relationship('Comment', cascade=_rel_cascade, passive_deletes=True)
 
     def __repr__(self):
-        return f'<Post ({self.id}): {self.title[0:50]}>'
-
-    @classmethod
-    def testing_create(cls, **kwargs):
-        post = cls(
-            title=kwargs.get('title', 'foo'),
-            author=kwargs.get('author', 'bar'),
-            body=kwargs.get('body', 'baz'),
-        )
-        db.session.add(post)
-        db.session.commit()
-        return post
+        return f'<Post {self.id}: {self.title[0:50]}>'
 
 
-class Comment(db.Model):
-    id = sa.Column(sa.Integer, primary_key=True)
+class Comment(EntityMixin, db.Model):
+    __tablename__ = 'comments'
+
     title = sa.Column(sa.String, nullable=False)
     author = sa.Column(sa.String, nullable=False)
     body = sa.Column(sa.String, nullable=False)
@@ -41,16 +34,19 @@ class Comment(db.Model):
     post = orm.relationship(Post)
 
     def __repr__(self):
-        return f'<Comment ({self.id}): {self.title[0:50]}>'
+        return f'<Comment {self.id}: {self.title[0:50]}>'
 
     @classmethod
     def testing_create(cls, **kwargs):
-        comment = cls(
-            title=kwargs.get('title', 'foo'),
-            author=kwargs.get('author', 'bar'),
-            body=kwargs.get('body', 'baz'),
-            post=kwargs.get('post') or Post.testing_create()
-        )
-        db.session.add(comment)
-        db.session.commit()
-        return comment
+        if 'post' not in kwargs and 'post_id' not in kwargs:
+            kwargs['post'] = Post.testing_create()
+
+        return super().testing_create(**kwargs)
+
+
+class Product(EntityMixin, db.Model):
+    __tablename__ = 'products'
+    __upsert_index_elements__ = ('code',)
+
+    code = sa.Column(sa.String, nullable=False, unique=True)
+    per_case = sa.Column(sa.Integer)
