@@ -1,3 +1,6 @@
+import sqlalchemy as sa
+from sqlalchemy import orm
+
 from {{cookiecutter.project_namespace}}.ext import db
 
 # Default cascade setting for parent/child relationships.  Should get set on parent side.
@@ -6,12 +9,12 @@ _rel_cascade = 'all, delete-orphan'
 
 
 class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String, nullable=False)
-    author = db.Column(db.String, nullable=False)
-    body = db.Column(db.String, nullable=False)
+    id = sa.Column(sa.Integer, primary_key=True)
+    title = sa.Column(sa.String, nullable=False)
+    author = sa.Column(sa.String, nullable=False)
+    body = sa.Column(sa.String, nullable=False)
 
-    comments = db.relationship('Comment', cascade=_rel_cascade, passive_deletes=True)
+    comments = orm.relationship('Comment', cascade=_rel_cascade, passive_deletes=True)
 
     def __repr__(self):
         return f'<Post ({self.id}): {self.title[0:50]}>'
@@ -29,13 +32,13 @@ class Post(db.Model):
 
 
 class Comment(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String, nullable=False)
-    author = db.Column(db.String, nullable=False)
-    body = db.Column(db.String, nullable=False)
+    id = sa.Column(sa.Integer, primary_key=True)
+    title = sa.Column(sa.String, nullable=False)
+    author = sa.Column(sa.String, nullable=False)
+    body = sa.Column(sa.String, nullable=False)
 
-    post_id = db.Column(db.Integer, db.ForeignKey(Post.id, ondelete='cascade'), nullable=False)
-    post = db.relationship(Post)
+    post_id = sa.Column(sa.Integer, sa.ForeignKey(Post.id, ondelete='cascade'), nullable=False)
+    post = orm.relationship(Post)
 
     def __repr__(self):
         return f'<Comment ({self.id}): {self.title[0:50]}>'
