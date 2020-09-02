@@ -4,3 +4,5 @@
 .coverage*
 coverage.xml
 .ci/test-reports
+dist
+*.pyz
