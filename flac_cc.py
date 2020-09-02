@@ -31,10 +31,11 @@ def create(target_dpath, run_tests, no_input, overwrite, flac_rec_local):
     result_dpath = pathlib.Path(result_dpath)
     print('created project at:', result_dpath)
 
-    sub_run('make', cwd=result_dpath / 'requirements')
-    sub_run('docker-compose', 'up', '-d', cwd=result_dpath)
-    sub_run('tox', cwd=result_dpath, check=False)
-    sub_run('docker-compose', 'down', cwd=result_dpath)
+    if run_tests:
+        sub_run('make', cwd=result_dpath / 'requirements')
+        sub_run('docker-compose', 'up', '-d', cwd=result_dpath)
+        sub_run('tox', cwd=result_dpath, check=False)
+        sub_run('docker-compose', 'down', cwd=result_dpath)
 
 
 def sub_run(*args, **kwargs):
