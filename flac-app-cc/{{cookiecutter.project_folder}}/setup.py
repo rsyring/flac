@@ -5,7 +5,7 @@ setup(
     name='{{ cookiecutter.project_name }}',
     entry_points={
         'console_scripts': [
-            '{{ cookiecutter.project_dashed }}={{cookiecutter.project_namespace}}.app:cli'
+            '{{ cookiecutter.project_namespace }}={{cookiecutter.project_namespace}}.app:cli'
         ],
     },
 )
