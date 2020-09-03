@@ -7,13 +7,18 @@ import flask.cli
 import flac.database
 import flac.config
 
+@click.group()
+def db():
+    """ database commands """
+    pass
 
-@click.command()
+
+@db.command('init')
 @click.option('--drop-first', is_flag=True, default=False)
 @click.option('--for-tests', is_flag=True, default=False)
 @flask.cli.with_appcontext
 def db_init(drop_first, for_tests):
-    """ Initialize the database """
+    """ Create databases """
     app = flask.current_app
     sa_url = app.config['SQLALCHEMY_DATABASE_URI']
     if for_tests:
@@ -22,11 +27,12 @@ def db_init(drop_first, for_tests):
     flac.database.create_db(sa_url, drop_first)
 
 
-@click.command()
-def db_tables():
-    """ Create new DB tables """
-    from .ext import db
-    db.create_all()
+@db.command('create-all')
+@flask.cli.with_appcontext
+def db_create_all():
+    """ Create new db objects """
+    flask.current_app.extensions['sqlalchemy'].db.create_all()
+    print('New database objects created')
 
 
 @click.command()
@@ -48,7 +54,7 @@ class FlacGroup(flask.cli.FlaskGroup):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.add_command(db_init)
+        self.add_command(db)
         self.add_command(config_info)
 
 
