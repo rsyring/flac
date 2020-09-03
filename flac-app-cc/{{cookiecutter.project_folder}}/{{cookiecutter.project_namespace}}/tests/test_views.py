@@ -2,5 +2,5 @@
 class TestViews:
 
     def test_hello(self, web):
-        resp = web.get('/hello')
-        assert resp.data == b'Hello DerbyPy!'
+        resp = web.get('/')
+        assert resp.data == b'Hello World!'
