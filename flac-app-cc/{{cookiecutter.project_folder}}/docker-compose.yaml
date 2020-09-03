@@ -24,3 +24,6 @@ services:
         POSTGRES_HOST_AUTH_METHOD: trust
         # Could use this instead with a strong password if working outside a dev env
         # POSTGRES_PASSWORD: password
+        POSTGRES_MULTIPLE_DATABASES: {{cookiecutter.project_namespace}},{{cookiecutter.project_namespace}}_tests
+      volumes:
+        - ./docker/pg-init-scripts:/docker-entrypoint-initdb.d
