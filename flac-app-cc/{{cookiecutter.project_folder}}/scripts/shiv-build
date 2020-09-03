@@ -19,8 +19,8 @@ def shiv_build(skip_deps):
     )
     msg = 'Built python3.7 version'
     if not skip_deps:
-        msg += ' with all deps (use --skip-deps next time if they haven\'t'
-        ' changed for a faster build)'
+        msg += ' with all deps (use --skip-deps next time if they haven\'t' \
+            ' changed for a faster build)'
     print(msg)
 
 
