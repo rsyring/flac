@@ -22,3 +22,4 @@ cookie cutter:
 - tox doesn't work when sqlalchemy isn't installed b/c of calling the `db` cli command.  Seems
   like I should think through this more...how to make db optional.  Additional customization
   in flask-cc.py?
+- flask-sqlalchemy dependency - see ext.py
