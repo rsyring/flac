@@ -79,12 +79,12 @@ def sub_run(*args, **kwargs):
     return subprocess.run(args, **kwargs)
 
 
-def build(scripts_dpath, app_name, pybin, skip_deps, pyz_name=None):
+def build(scripts_dpath, app_name, pybin, skip_deps, pyz_name=None, reqs_fname='production.txt'):
     pyz_name = pyz_name or app_name
     proj_dpath = scripts_dpath.parent
     app_dpath = proj_dpath / app_name
     reqs_dpath = proj_dpath / 'requirements'
-    reqs_fpath = reqs_dpath / 'production.txt'
+    reqs_fpath = reqs_dpath / reqs_fname
     dist_dpath = proj_dpath / 'dist'
     dist_app_dpath = dist_dpath / app_name
     pyz_fpath = proj_dpath / f'{pyz_name}.pyz'

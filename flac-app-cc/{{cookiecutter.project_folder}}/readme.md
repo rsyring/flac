@@ -1,5 +1,5 @@
-Jax
-====
+{{ cookiecutter.project_name }}
+================================================
 
 [![CircleCI](https://circleci.com/gh/{{ cookiecutter.gh_repo_path }}.svg?style=svg)](https://circleci.com/gh/{{ cookiecutter.gh_repo_path }})
 [![codecov](https://codecov.io/gh/{{ cookiecutter.gh_repo_path }}/branch/master/graph/badge.svg)](https://codecov.io/gh/{{ cookiecutter.gh_repo_path }})

@@ -10,6 +10,10 @@
 # - `docker rmi <image name>`
 # - `docker stop $(docker ps -aq)`: stop all running containers
 # - `docker rm $(docker ps -a -q)`: remove all stopped containers
+# Can use a .env to customize port mappings, but that will only work when running docker-compose in
+# the same directory as this file.  You can also use an override file if desired.
+# https://docs.docker.com/compose/environment-variables/
+# https://docs.docker.com/compose/extends/
 
 version: '2'
 services:
@@ -17,13 +21,11 @@ services:
       image: postgres:{{ cookiecutter.db_postgres_version }}-alpine
       container_name: {{ cookiecutter.project_dashed }}-pg
       ports:
-        - '127.0.0.1:54321:5432'
+        - '${DC_POSTGRES_IP:-127.0.0.1}:${DC_POSTGRES_PORT:-54321}:5432'
       environment:
+        POSTGRES_MULTIPLE_DATABASES: {{cookiecutter.project_dashed}},{{cookiecutter.project_dashed}}_tests
         # Ok for local dev, potentially UNSAFE in other applications.  Don't blindly copy & paste
         # without considering implications.
         POSTGRES_HOST_AUTH_METHOD: trust
-        # Could use this instead with a strong password if working outside a dev env
-        # POSTGRES_PASSWORD: password
-        POSTGRES_MULTIPLE_DATABASES: {{cookiecutter.project_namespace}},{{cookiecutter.project_namespace}}_tests
       volumes:
         - ./docker/pg-init-scripts:/docker-entrypoint-initdb.d

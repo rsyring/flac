@@ -2,11 +2,13 @@
 appdirs
 {{ cookiecutter.flac_req_spec }}
 flask
-flask_sqlalchemy
-psycopg2-binary
 python-dotenv
 python-json-logger
-sqlalchemy_utils
+
+# Uncomment if you want SA
+# flask_sqlalchemy
+# psycopg2-binary
+# sqlalchemy_utils
 
 # testing
 pytest

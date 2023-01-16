@@ -1,0 +1,12 @@
+# Match the versions that common will use.
+-r common.txt
+
+# Needed for the cleanup in our shiv preamble.  If not using the development version of flac,
+# then this could get put into common.in and this file cant get removed.  In that case, you'd also
+# want to edit:
+#
+#   1. compile.py: remove sed replacement (shiv.txt won't exist anymore)
+#   2. shiv/build: change requirements file to common.txt
+#
+#  TODO: replace with pypi name once it gets published there
+https://github.com/level12/shiv-utils/archive/master.tar.gz#egg=shiv-utils

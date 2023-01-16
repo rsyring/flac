@@ -1,16 +1,28 @@
 import pathlib
+import sys
 
 import click
 import flask
 import flask.cli
 
-import flac.database
 import flac.config
+try:
+    import flac.database as flac_db
+except ImportError:
+    flac_db = None
+
 
 @click.group()
 def db():
     """ database commands """
-    pass
+    if not flac_db:
+        message = click.style('ERROR:', fg='red')
+        message += (
+            ' flac.database can not be imported.  Have you uncommented and installed the'
+            ' database dependencies in common.in?'
+        )
+        click.echo(message, err=True)
+        sys.exit(1)
 
 
 @db.command('init')
@@ -41,7 +53,8 @@ def config_info():
     """ Show config info """
     app = flask.current_app
     print(f'app.name: {app.name}')
-    print(f'app.env: {app.env}')
+    print(f'app.debug: {app.debug}')
+    print(f'app.testing: {app.testing}')
 
     print('Config file paths:')
     for fpath in flac.config.app_config_fpaths(app):
@@ -62,13 +75,13 @@ def cli_entry(flac_app_cls):
 
     def inner(wrapped):
         wrapped = flask.cli.pass_script_info(wrapped)
-        wrapped = click.option('--quiet', 'log_level', flag_value='quiet',
+        wrapped = click.option('--log-quiet', 'log_level', flag_value='quiet',
             help='Hide info level log messages')(wrapped)
-        wrapped = click.option('--info', 'log_level', flag_value='info', default=True,
+        wrapped = click.option('--log-info', 'log_level', flag_value='info', default=True,
             help='Show info level log messages (default)')(wrapped)
-        wrapped = click.option('--debug', 'log_level', flag_value='debug',
+        wrapped = click.option('--log-debug', 'log_level', flag_value='debug',
             help='Show debug level log messages')(wrapped)
         return click.group(cls=FlacGroup,
-            create_app=lambda _: flac_app_cls.create(init_app=False))(wrapped)
+            create_app=lambda: flac_app_cls.create(init_app=False))(wrapped)
 
     return inner

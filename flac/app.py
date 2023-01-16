@@ -23,10 +23,7 @@ class FlacApp(flask.Flask):
             app. But if we don't init the blueprints right away, then the CLI doesn't know
             anything about the cli groups & commands added by blueprints.
         """
-        if testing:
-            os.environ['FLASK_ENV'] = 'testing'
-
-        # Ansure a pathlib object so we can assume that elsewhere
+        # Ensure a pathlib object so it can be assumed elsewhere
         root_path = pathlib.Path(root_path)
 
         app = cls(app_name, root_path=root_path, **kwargs)

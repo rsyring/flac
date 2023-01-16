@@ -5,7 +5,7 @@ def db_uri(suffix=''):
     if 'CI' in os.environ:
         return 'postgresql://postgres@localhost/postgres'
 
-    return f'postgresql://postgres@localhost:54321/{{cookiecutter.project_namespace}}{suffix}'
+    return f'postgresql://postgres@localhost:54321/{{cookiecutter.project_dashed}}{suffix}'
 
 
 def development_config(app, config):

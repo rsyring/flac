@@ -1,6 +1,6 @@
 import os.path as osp
 
-from setuptools import setup, find_namespace_packages
+from setuptools import setup, find_packages
 
 cdir = osp.abspath(osp.dirname(__file__))
 README = open(osp.join(cdir, 'README.md')).read()
@@ -27,7 +27,7 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3',
     ],
-    packages=find_namespace_packages(include=['flac']),
+    packages=find_packages(include=['flac']),
     py_modules=['flac_cc'],
     include_package_data=True,
     zip_safe=False,
@@ -36,17 +36,19 @@ setup(
         'arrow',
         'blazeutils',
         'Flask',
-        'Flask_sqlalchemy',
-        'psycopg2-binary',
         'python-json-logger',
         'requests',
-        'sqlalchemy-utils',
     ],
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
+        'db': [
+            'Flask_sqlalchemy',
+            'psycopg2-binary',
+            'sqlalchemy-utils',
+        ],
         'dev': [
             'flake8',
             'cookiecutter',

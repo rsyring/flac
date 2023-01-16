@@ -1,6 +1,6 @@
 import pytest
 
-from {{cookiecutter.project_namespace}}.model import entities as ents
+from {{cookiecutter.project_pymod}}.model import entities as ents
 
 
 class TestPost:

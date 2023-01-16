@@ -1,0 +1,24 @@
+flac:
+
+- get our own tests in order
+- add circleci (but not tox) test for cookiecutter tests
+- change logging paradigm to assume deployment with systemd?
+    - https://caddyserver.com/docs/logging
+- Should be able to use it without a db but sqlalchemy_utils is in the top-level imports.  We'd
+    have to conditionally include the DB cli commands.
+- Shouldn't bake sentry into the command line.
+
+
+cookie cutter:
+
+- integrity check the codecov script
+- keg cc - tox.ini: review diffs
+- gunicorn isn't in any requirements so the cli command doesn't work
+- no loading on relationships by default
+- query_with()
+- query profiling in tests
+- improve ability to set child/parent kwargs in testing_create(), like blender
+- rename testing_create() to fake
+- tox doesn't work when sqlalchemy isn't installed b/c of calling the `db` cli command.  Seems
+  like I should think through this more...how to make db optional.  Additional customization
+  in flask-cc.py?

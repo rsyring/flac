@@ -2,7 +2,7 @@ import sqlalchemy as sa
 from sqlalchemy import orm
 
 from .utils import EntityMixin
-from {{cookiecutter.project_namespace}}.ext import db
+from {{cookiecutter.project_pymod}}.ext import db
 
 # Default cascade setting for parent/child relationships.  Should get set on parent side.
 # Docs: https://l12.io/sa-parent-child-relationship-config
@@ -16,7 +16,8 @@ class Post(EntityMixin, db.Model):
     author = sa.Column(sa.String, nullable=False)
     body = sa.Column(sa.String, nullable=False)
 
-    comments = orm.relationship('Comment', cascade=_rel_cascade, passive_deletes=True)
+    comments = orm.relationship('Comment', cascade=_rel_cascade, passive_deletes=True,
+        back_populates='post')
 
     def __repr__(self):
         return f'<Post {self.id}: {self.title[0:50]}>'
@@ -30,7 +31,7 @@ class Comment(EntityMixin, db.Model):
     body = sa.Column(sa.String, nullable=False)
 
     post_id = sa.Column(sa.Integer, sa.ForeignKey(Post.id, ondelete='cascade'), nullable=False)
-    post = orm.relationship(Post)
+    post = orm.relationship(Post, back_populates='comments')
 
     def __repr__(self):
         return f'<Comment {self.id}: {self.title[0:50]}>'

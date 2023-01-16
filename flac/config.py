@@ -12,7 +12,13 @@ def init_config(app):
 def build_config(app):
     config = default_config(app)
 
-    config = load_fpath_configs(app, config, app_config_fpaths(app), app.env)
+    env_prefix = None
+    if app.testing:
+        env_prefix = 'testing'
+    elif app.debug:
+        env_prefix = 'development'
+
+    config = load_fpath_configs(app, config, app_config_fpaths(app), env_prefix)
     config.update(environ_config(app.name))
 
     return config
@@ -34,7 +40,8 @@ def load_fpath_config(app, config, fpath, config_prefix):
     # TODO: not sure we need 'default'?  config files could call common function to assign defaults
     # Unless all the defaults get ran first, then the environ configs
     config = call_env_config(app, config, pymod_vars, 'default')
-    config = call_env_config(app, config, pymod_vars, config_prefix)
+    if config_prefix:
+        config = call_env_config(app, config, pymod_vars, config_prefix)
 
     return config
 

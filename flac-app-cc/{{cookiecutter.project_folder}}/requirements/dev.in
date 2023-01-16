@@ -5,3 +5,7 @@
 # for viewing GH flavored markdown
 grip
 shiv
+
+# Needed for the cleanup in our shiv preamble.
+https://github.com/level12/shiv-utils/archive/master.tar.gz#egg=shiv-utils
+

@@ -12,6 +12,7 @@ def create_db(db_url, replace_existing):
     if replace_existing and exists:
         safunc.drop_database(db_url)
         log.info('database dropped')
+        exists = False
 
     if exists:
         log.info('database already exists')

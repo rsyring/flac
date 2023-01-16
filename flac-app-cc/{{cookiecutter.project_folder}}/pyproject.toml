@@ -1,0 +1,27 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "{{ cookiecutter.project_name }}"
+description = ""
+authors = [{name = "{{cookiecutter.developer_name}}", email = "{{cookiecutter.developer_email}}"}]
+# license = {file = "LICENSE"}
+# classifiers = ["License :: OSI Approved :: MIT License"]
+dynamic = ["version"]
+
+[project.scripts]
+{{cookiecutter.project_cli_bin}} = "{{cookiecutter.project_pymod}}.app:cli"
+
+[project.urls]
+Home = "https://github.com/{{cookiecutter.gh_repo_path}}"
+
+[tool.black]
+skip-string-normalization = true
+line-length = 100
+
+[tool.flit.module]
+name = "{{ cookiecutter.project_pymod }}"
+
+[tool.isort]
+profile = 'black'
