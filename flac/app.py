@@ -57,7 +57,8 @@ class FlacApp(flask.Flask):
         pass
 
     def on_testing_start(self):
-        fsa_state = self.extensions.get('sqlalchemy')
-        if fsa_state:
-            fsa_state.db.drop_all(app=self)
-            fsa_state.db.create_all(app=self)
+        sa_inst = self.extensions.get('sqlalchemy')
+        if sa_inst:
+            with self.app_context():
+                sa_inst.drop_all()
+                sa_inst.create_all()
