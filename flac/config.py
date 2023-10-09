@@ -34,7 +34,7 @@ def load_fpath_configs(app, config, fpaths, config_prefix):
 
 
 def load_fpath_config(app, config, fpath, config_prefix):
-    pymod_vars = {}
+    pymod_vars = {'__file__': str(fpath)}
     exec(fpath.read_bytes(), pymod_vars)
 
     # TODO: not sure we need 'default'?  config files could call common function to assign defaults
