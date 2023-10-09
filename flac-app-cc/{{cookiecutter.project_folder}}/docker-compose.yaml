@@ -23,9 +23,6 @@ services:
       ports:
         - '${DC_POSTGRES_IP:-127.0.0.1}:${DC_POSTGRES_PORT:-54321}:5432'
       environment:
-        POSTGRES_MULTIPLE_DATABASES: {{cookiecutter.project_dashed}},{{cookiecutter.project_dashed}}_tests
-        # Ok for local dev, potentially UNSAFE in other applications.  Don't blindly copy & paste
+        # Ok for local dev, UNSAFE in most other applications.  Don't blindly copy & paste
         # without considering implications.
         POSTGRES_HOST_AUTH_METHOD: trust
-      volumes:
-        - ./docker/pg-init-scripts:/docker-entrypoint-initdb.d

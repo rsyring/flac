@@ -1,6 +1,20 @@
 version: 2
 jobs:
     build:
+        # CircleCI keeps cache seven days (as of 6/2022):
+        #   https://app.circleci.com/settings/plan/github/level12/usage-controls
+        #
+        # If you want to avoid the existing cache, add a comment to common.txt to change the
+        # file checksum.  E.g. "circle-cache-bust: 2023-12-25'
+        parameters:
+        {% raw %}
+            cache-key-pip:
+                type: string
+                default: 'pip-cache-{{ checksum "requirements/common.txt" }}'
+            cache-key-pre-commit:
+                type: string
+                default: 'pre-commit-cache-{{ checksum ".pre-commit-config.yaml" }}'
+        {% endraw %}
         docker:
             - image: level12/python-test-multi
             - image: postgres:{{cookiecutter.db_postgres_version}}
@@ -11,10 +25,22 @@ jobs:
         steps:
             - checkout
 
+            # Restore tox and pip cached deps
+            - restore_cache:
+                keys:
+                    - "<< parameters.cache-key-pip >>"
+
+            # Restore pre-commit's cached deps
+            - restore_cache:
+                keys:
+                    - "<< parameters.cache-key-pre-commit >>"
+
             - run:
                 name: debugging info
                 command: |
-                    ls -al
+                    # Have to make sure directories are there or ls will fail the build.
+                    mkdir -p .tox ~/.cache/pip ~/.cache/pip-tools
+                    ls -al . .tox ~/.cache/pip ~/.cache/pip-tools
 
             - run:
                 name: install testing helpers needed at OS level
@@ -31,9 +57,24 @@ jobs:
                 name: run tox
                 command: {{cookiecutter.python_executable}} -m tox
 
+            - save_cache:
+                key: "<< parameters.cache-key-pip >>"
+                paths:
+                    - .tox
+                    - ~/.cache/pip
+                    - ~/.cache/pip-tools
+
+            - save_cache:
+                key: "<< parameters.cache-key-pre-commit >>"
+                paths:
+                    - ~/.cache/pre-commit/
+
             - store_test_results:
                 path: .ci/test-reports/
 
             - run:
                 name: push code coverage
-                command: bash <(curl -s https://codecov.io/bash) -X coveragepy -t {{cookiecutter.codecov_api_token}}
+                command: |
+                    bash scripts/codecov-verify
+                    bash codecov -X coveragepy -X html -t {{cookiecutter.codecov_api_token}}
+

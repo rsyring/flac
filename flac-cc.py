@@ -1,12 +1,75 @@
 #!/bin/env python
-import pathlib
+import hashlib
+import os
+from pathlib import Path
+import shlex
 import subprocess
+import tempfile
 
 import click
 from cookiecutter.main import cookiecutter
 
-flac_proj_dpath = pathlib.Path(__file__).resolve().parent
+flac_proj_dpath = Path(__file__).resolve().parent
 cc_dpath = flac_proj_dpath.joinpath('flac-app-cc')
+cc_reqs_dpath = cc_dpath.joinpath('{{cookiecutter.project_folder}}', 'requirements')
+
+
+def sub_run(*args, **kwargs):
+    kwargs.setdefault('check', True)
+    echo(f'running - `{shlex.join(str(arg) for arg in args)}`')
+    return subprocess.run(args, **kwargs)
+
+
+def copy_mtime(src_path: Path, dst_path: Path):
+    src_stat = src_path.stat()
+    mtime = src_stat.st_mtime
+    os.utime(dst_path, (mtime, mtime))
+
+
+def sync_mtimes(src_dpath: Path, dst_dpath: Path, *fnames):
+    for fname in fnames:
+        src_fpath = src_dpath.joinpath(fname)
+        dst_fpath = dst_dpath.joinpath(fname)
+        copy_mtime(src_fpath, dst_fpath)
+
+
+class VEnv:
+    def __init__(self, app_path):
+        self.app_path = app_path
+        app_hash = hashlib.sha1(bytes(app_path)).hexdigest()
+        self.venv_path = Path(tempfile.gettempdir()) \
+            / f'{app_path.name}-{app_hash}'
+        self.echo_hc_venv = True
+
+    def ensure_exists(self):
+        if self.venv_path.exists():
+            if self.echo_hc_venv:
+                echo(f'Existing health check venv: {self.venv_path}')
+                self.echo_hc_venv = False
+
+            return
+
+        echo(f'Creating health check venv: {self.venv_path}')
+        sub_run('python', '-m', 'venv', self.venv_path)
+        self.install('-U', 'pip')
+
+    def sub_run(self, *args, **kwargs):
+        env = kwargs.setdefault('env', {})
+        env['VIRTUAL_ENV'] = self.venv_path
+        current_path = os.environ.get('PATH')
+        env['PATH'] = f'{self.venv_path}{os.pathsep}{current_path}'
+
+        self.ensure_exists()
+        sub_run(*args, **kwargs)
+
+    def install(self, *args):
+        self.sub_run('pip', '--quiet', 'install', *args)
+
+
+def echo(msg):
+    click.secho('flac-cc:', fg='black', bg='yellow', bold=True, nl=False)
+    click.echo(' ' + msg)
+
 
 @click.group()
 def cli():
@@ -17,36 +80,56 @@ def cli():
 @click.argument('target_dpath')
 @click.option('--run-tests', is_flag=True, default=False)
 @click.option('--no-input', is_flag=True, default=False)
+@click.option('--replay', is_flag=True, default=False)
 @click.option('--overwrite', is_flag=True, default=False)
 @click.option('--flac-rec-local', is_flag=True, default=False, help='Use local flac src?')
 @click.option('--no-pre-commit', is_flag=True, default=False)
-def create(target_dpath, run_tests, no_input, overwrite, flac_rec_local, no_pre_commit):
+def create(target_dpath, run_tests, no_input, overwrite, flac_rec_local, no_pre_commit, replay):
     extra_context = {}
+    if flac_rec_local and replay:
+        echo('Replay will include the previous value for the flac requirement.  Don\'t use'
+             ' --flac-rec-local with --replay.')
+        return
+
     if flac_rec_local:
         extra_context['flac_req_spec'] = f'-e {flac_proj_dpath}'
         extra_context['flac_req_spec_shiv'] = flac_proj_dpath
 
-    result_dpath = cookiecutter(
-        str(cc_dpath), output_dir=target_dpath, no_input=no_input, overwrite_if_exists=overwrite,
-        extra_context=extra_context
-    )
-    result_dpath = pathlib.Path(result_dpath)
-    print('created project at:', result_dpath)
+    cc_kwargs = dict(output_dir=target_dpath, no_input=no_input, overwrite_if_exists=overwrite,
+                     replay=replay)
 
+    if extra_context:
+        cc_kwargs['extra_context'] = extra_context
+
+    result_dpath = cookiecutter(str(cc_dpath), **cc_kwargs)
+    result_dpath = Path(result_dpath)
+    echo(f'Created project at: {result_dpath}')
+
+    sub_run('git', 'init', cwd=result_dpath)
+
+    venv = VEnv(result_dpath)
     if not no_pre_commit:
-        print('Pre-commit autoupdate running...', result_dpath)
-        sub_run('pre-commit', 'autoupdate', cwd=result_dpath)
+        venv.install('pre-commit')
+        echo('Pre-commit autoupdate running...')
+        venv.sub_run('pre-commit', 'autoupdate', cwd=result_dpath)
 
     if run_tests:
-        sub_run('make', cwd=result_dpath / 'requirements')
-        sub_run('docker-compose', 'up', '-d', cwd=result_dpath)
-        sub_run('tox', cwd=result_dpath, check=False)
-        sub_run('docker-compose', 'down', cwd=result_dpath)
+        echo('Installing invoke & tox for health checks...')
+        venv.install('invoke', 'tox')
 
+        result_reqs_dpath = result_dpath.joinpath('requirements')
+        sync_mtimes(cc_reqs_dpath, result_reqs_dpath, 'common.in', 'dev.in', 'shiv.in')
 
-def sub_run(*args, **kwargs):
-    kwargs.setdefault('check', True)
-    return subprocess.run(args, **kwargs)
+        # Have to bootstrap and then compile the requirements b/c tox will not.
+        venv.sub_run('python', result_reqs_dpath / 'bootstrap.py')
+        venv.sub_run('invoke', 'reqs-compile', cwd=result_dpath)
+
+        sub_run('docker', 'compose', 'up', '-d', cwd=result_dpath)
+        venv.sub_run('tox', '-e', 'py311-frozen', cwd=result_dpath, check=False)
+        sub_run('docker', 'compose', 'down', '--remove-orphans', '--volumes', cwd=result_dpath)
+
+    if not replay:
+        echo('Hint: run with --replay next time')
 
 
 if __name__ == '__main__':

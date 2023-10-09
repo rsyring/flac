@@ -8,7 +8,7 @@
     "project_folder": "{{ cookiecutter.project_dashed }}-pkg",
     "developer_name": "",
     "developer_email": "",
-    "python_version": "3.10",
+    "python_version": "3.11",
     "db_postgres_version": "15",
     "python_tox": "py{{cookiecutter.python_version|replace('.', '') }}",
     "python_executable": "python{{cookiecutter.python_version}}",

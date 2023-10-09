@@ -1,0 +1,8 @@
+# env_file = 'env'
+
+[env]
+FLASK_DEBUG = '1'
+
+[tools]
+python.version = '{{cookiecutter.python_version}}'
+python.virtualenv = '{{ "{{ env.WORKON_HOME }}" }}/{{ cookiecutter.project_name }}'
