@@ -11,7 +11,6 @@ flac:
 
 cookie cutter:
 
-- integrity check the codecov script
 - keg cc - tox.ini: review diffs
 - gunicorn isn't in any requirements so the cli command doesn't work
 - no loading on relationships by default
@@ -23,3 +22,9 @@ cookie cutter:
   like I should think through this more...how to make db optional.  Additional customization
   in flask-cc.py?
 - flask-sqlalchemy dependency - see ext.py
+- check doist app for project updates
+- use rust wsgi server for production
+- take reqs compiliation logic from zulu
+- code is not formatted or linted
+- get rid of .flake8
+- get rid of MANIFEST.in
