@@ -7,6 +7,7 @@ import uuid
 import arrow
 from blazeutils.strings import randchars
 import flask
+import flask_sqlalchemy as fsa
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import insert as pgsql_insert, UUID
 import sqlalchemy.ext.compiler
@@ -15,6 +16,10 @@ from sqlalchemy.sql import expression
 import sqlalchemy.types
 from sqlalchemy_utils import ArrowType, EmailType
 import wrapt
+
+
+def flask_db() -> fsa.SQLAlchemy:
+    return flask.current_app.extensions['sqlalchemy']
 
 
 class utcnow(expression.FunctionElement):
@@ -127,17 +132,17 @@ def random_date(start=dt.date(1900, 1, 1), end=dt.date(1900, 12, 31)):
 
 def session_commit():
     try:
-        flask.current_app.extensions['sqlalchemy'].db.session.commit()
+        flask_db().session.commit()
     except Exception:
-        flask.current_app.extensions['sqlalchemy'].db.session.rollback()
+        flask_db().session.rollback()
         raise
 
 
 def session_flush():
     try:
-        flask.current_app.extensions['sqlalchemy'].db.session.flush()
+        flask_db().session.flush()
     except Exception:
-        flask.current_app.extensions['sqlalchemy'].db.session.rollback()
+        flask_db().session.rollback()
         raise
 
 
@@ -157,7 +162,7 @@ class MethodsMixin:
 
     @classmethod
     def _db(cls):
-        return flask.current_app.extensions['sqlalchemy'].db
+        return flask.current_app.extensions['sqlalchemy']
 
     @classmethod
     def delete_all(cls):
