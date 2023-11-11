@@ -28,3 +28,4 @@ cookie cutter:
 - code is not formatted or linted
 - get rid of .flake8
 - get rid of MANIFEST.in
+- use pip-audit instead of safety
