@@ -5,21 +5,25 @@ import os.path as osp
 import appdirs
 
 
-def init_config(app):
-    app.config.update(build_config(app))
+def init_config(app, profile_name):
+    app.config.update(build_config(app, profile_name))
 
 
-def build_config(app):
-    config = default_config(app)
+def build_config(app, profile_name):
+    env_config = environ_config(app)
 
-    env_prefix = None
-    if app.testing:
-        env_prefix = 'testing'
-    elif app.debug:
-        env_prefix = 'development'
+    profile_name = env_config.pop('CONFIG_PROFILE', profile_name)
+    if not profile_name and app.testing:
+        profile_name = 'testing'
+    elif not profile_name and app.debug:
+        profile_name = 'development'
 
-    config = load_fpath_configs(app, config, app_config_fpaths(app), env_prefix)
-    config.update(environ_config(app.name))
+    # TODO: set default_config on the app and then call it as app.default_config so that
+    # it can be easily overriden.
+    config = default_config(app, profile_name)
+
+    config = load_fpath_configs(app, config, app_config_fpaths(app), profile_name)
+    config.update()
 
     return config
 
@@ -37,8 +41,11 @@ def load_fpath_config(app, config, fpath, config_prefix):
     pymod_vars = {'__file__': str(fpath)}
     exec(fpath.read_bytes(), pymod_vars)
 
-    # TODO: not sure we need 'default'?  config files could call common function to assign defaults
-    # Unless all the defaults get ran first, then the environ configs
+    # Default config has at least two purposes:
+    # 1) Set defaults at the OS/User level while still being able to override at the app config
+    #    level.
+    # 2) Enable a default config without knowing the prefix name.  Helpful in deployed environments
+    #    where only a single config exists and will be used by default.
     config = call_env_config(app, config, pymod_vars, 'default')
     if config_prefix:
         config = call_env_config(app, config, pymod_vars, config_prefix)
@@ -63,15 +70,20 @@ def app_config_fpaths(app):
     ]
 
 
-def default_config(app):
+def default_config(app, config_profile):
     return {
+        # TODO: shouldn't be here?
         'SQLALCHEMY_TRACK_MODIFICATIONS': False,
     }
 
 
-def environ_config(prefix):
+def environ_key(app, key):
+    return f'{app.name.upper()}_{key}'
+
+
+def environ_config(app):
     retval = {}
-    app_prefix = f'{prefix.upper()}_'
+    app_prefix = environ_key(app, '')
     for key, val in os.environ.items():
         if key.startswith(app_prefix):
             config_key = key.replace(app_prefix, '', 1)

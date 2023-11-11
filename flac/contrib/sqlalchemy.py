@@ -1,21 +1,22 @@
 import datetime as dt
-from decimal import Decimal
 import math
 import random
 import uuid
+from decimal import Decimal
 
 import arrow
-from blazeutils.strings import randchars
 import flask
 import flask_sqlalchemy as fsa
 import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import insert as pgsql_insert, UUID
 import sqlalchemy.ext.compiler
+import sqlalchemy.types
+import wrapt
+from blazeutils.strings import randchars
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import insert as pgsql_insert
 from sqlalchemy.inspection import inspect
 from sqlalchemy.sql import expression
-import sqlalchemy.types
 from sqlalchemy_utils import ArrowType, EmailType
-import wrapt
 
 
 def flask_db() -> fsa.SQLAlchemy:
@@ -56,15 +57,16 @@ def _kwargs_match_entity(wrapped, instance, args, kwargs):
         # Ignore kwargs starting with "_"
         kwarg_keys = set(key for key in kwargs if not key.startswith('_'))
         extra_kwargs = kwarg_keys - allowed_keys
-        assert not extra_kwargs, \
-            'Unknown column or relationship names in kwargs: {kwargs!r}'.format(
-                kwargs=sorted(extra_kwargs))
+        assert (
+            not extra_kwargs
+        ), 'Unknown column or relationship names in kwargs: {kwargs!r}'.format(
+            kwargs=sorted(extra_kwargs)
+        )
 
     return wrapped(*args, **kwargs)
 
 
-def _keyword_optional(keyword, before=False, after=False, keep_keyword=False,
-                     when_missing=False):
+def _keyword_optional(keyword, before=False, after=False, keep_keyword=False, when_missing=False):
     """Execute a function before and after the decorated function if the keyword
     is in the kwargs
     Examples:
@@ -78,9 +80,9 @@ def _keyword_optional(keyword, before=False, after=False, keep_keyword=False,
 
     @wrapt.decorator
     def _execute(wrapped, instance, args, kwargs):
-        do_it = (kwargs.get(keyword, when_missing)
-                 if keep_keyword
-                 else kwargs.pop(keyword, when_missing))
+        do_it = (
+            kwargs.get(keyword, when_missing) if keep_keyword else kwargs.pop(keyword, when_missing)
+        )
 
         if before and do_it:
             before()
@@ -104,7 +106,7 @@ def random_numeric(column):
 
     whole = random.randint(-max_whole, max_whole)
 
-    fractional = Decimal(random.randint(0, 10 ** fractional_digits - 1)) / 10 ** fractional_digits
+    fractional = Decimal(random.randint(0, 10**fractional_digits - 1)) / 10**fractional_digits
     return fractional + whole
 
 
@@ -118,9 +120,13 @@ def randemail(length, randomizer=randchars):
         raise ValueError('length must be at least 7')
 
     half = (length - 2 - 3) / 2.0  # 2 characters for @ and . and 3 for TLD
-    return (randomizer(int(math.floor(half)), 'alphanumeric')
-            + '@' + randomizer(int(math.ceil(half)), 'alphanumeric')
-            + '.' + randomizer(3, 'alpha'))
+    return (
+        randomizer(int(math.floor(half)), 'alphanumeric')
+        + '@'
+        + randomizer(int(math.ceil(half)), 'alphanumeric')
+        + '.'
+        + randomizer(3, 'alpha')
+    )
 
 
 def random_date(start=dt.date(1900, 1, 1), end=dt.date(1900, 12, 31)):
@@ -152,14 +158,19 @@ might_flush = _keyword_optional('_flush', after=session_flush)
 
 class DefaultColsMixin:
     id = sa.Column('id', sa.Integer, primary_key=True)
-    created_utc = sa.Column(ArrowType, nullable=False, default=arrow.utcnow,
-                            server_default=utcnow())
-    updated_utc = sa.Column(ArrowType, nullable=False, default=arrow.utcnow, onupdate=arrow.utcnow,
-                            server_default=utcnow())
+    created_utc = sa.Column(
+        ArrowType, nullable=False, default=arrow.utcnow, server_default=utcnow()
+    )
+    updated_utc = sa.Column(
+        ArrowType,
+        nullable=False,
+        default=arrow.utcnow,
+        onupdate=arrow.utcnow,
+        server_default=utcnow(),
+    )
 
 
 class MethodsMixin:
-
     @classmethod
     def _db(cls):
         return flask.current_app.extensions['sqlalchemy']
@@ -224,18 +235,18 @@ class MethodsMixin:
 
         insp = sa.inspection.inspect(cls)
 
-        skippable = lambda column: (
-            column.key in kwargs      # skip fields already in kwargs
-            or column.foreign_keys    # skip foreign keys
-            or column.server_default  # skip fields with server defaults
-            or column.default         # skip fields with defaults
-            or column.primary_key     # skip any primary key
-            or column.nullable        # skip nullable columns
-        )
+        def skippable(column):
+            return (
+                column.key in kwargs
+                or column.foreign_keys
+                or column.server_default
+                or column.default
+                or column.primary_key
+                or column.nullable
+            )
 
         for column in (col for col in insp.columns if not skippable(col)):
-            kwargs[column.key] = cls.random_data_for_column(
-                column, numeric_range)
+            kwargs[column.key] = cls.random_data_for_column(column, numeric_range)
 
         return kwargs
 

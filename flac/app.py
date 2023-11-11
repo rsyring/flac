@@ -31,19 +31,20 @@ class FlacApp(flask.Flask):
 
         app.init_blueprints()
         if init_app:
-            app.init_app()
+            app.init_app(None)
 
         return app
 
     def init_blueprints(self):
         pass
 
-    def init_app(self, log_level='info', with_sentry=False):
-        init_config(self)
+    def init_app(self, config_profile, log_level='info', with_sentry=False):
+        init_config(self, config_profile)
 
         if not self.testing:
             init_logging(log_level, self.name)
 
+        # TODO: this shouldn't be in the core
         if with_sentry:
             from flac.contrib.sentry import init_sentry
             init_sentry(self)
