@@ -53,7 +53,7 @@ def config_info():
     print(f'app.testing: {app.testing}')
 
     print('Config file paths:')
-    for fpath in flac.config.app_config_fpaths(app):
+    for fpath in app.config['_flac.config.fpaths']:
         fpath = pathlib.Path(fpath)
         status = 'exists' if fpath.exists() else 'missing'
         print(f'    {fpath}: {status}')

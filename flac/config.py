@@ -20,10 +20,14 @@ def build_config(app, profile_name):
 
     # TODO: set default_config on the app and then call it as app.default_config so that
     # it can be easily overriden.
-    config = default_config(app, profile_name)
+    config = default_config(app, profile_name) | env_config
 
-    config = load_fpath_configs(app, config, app_config_fpaths(app), profile_name)
+    config_fpaths = app_config_fpaths(app, config)
+    config = load_fpath_configs(app, config, config_fpaths, profile_name)
     config.update()
+
+    config['_flac.config.fpaths'] = config_fpaths
+    config['_flac.config.profile_name'] = profile_name
 
     return config
 
@@ -61,13 +65,20 @@ def call_env_config(app, config, pymod_vars, config_prefix):
     return config
 
 
-def app_config_fpaths(app):
-    return [
-        # todo: should work on Windows too
+def app_config_fpaths(app, config):
+    config_fpaths = [
+        # TODO: should work on Windows too
         f'/etc/{app.name}/config.py',
         osp.join(appdirs.user_config_dir(app.name), 'config.py'),
         osp.join(app.root_path.parent.resolve(), f'{app.name}-config.py'),
     ]
+    print(config)
+    env_config_fpath = config.get('CONFIG_FILE')
+
+    if env_config_fpath:
+        config_fpaths.append(pathlib.Path(env_config_fpath).resolve())
+
+    return config_fpaths
 
 
 def default_config(app, config_profile):
