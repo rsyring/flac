@@ -27,6 +27,6 @@ class {{cookiecutter.project_class}}App(flac.app.FlacApp):
 @flac.cli.cli_entry({{cookiecutter.project_class}}App)
 @click.option('--with-sentry', is_flag=True, default=False,
     help='Enable Sentry (usually only in production)')
-def cli(scriptinfo, log_level, with_sentry):
+def cli(scriptinfo, log_level, config_profile, with_sentry):
     app = scriptinfo.load_app()
-    app.init_app(log_level, with_sentry=with_sentry)
+    app.init_app(config_profile, log_level, with_sentry=with_sentry)
