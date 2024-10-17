@@ -58,6 +58,9 @@ def config_info():
         status = 'exists' if fpath.exists() else 'missing'
         print(f'    {fpath}: {status}')
 
+    for k, v in app.config.items():
+        print(k, v)
+
 
 class FlacGroup(flask.cli.FlaskGroup):
 
