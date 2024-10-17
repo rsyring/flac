@@ -1,4 +1,5 @@
 #!/bin/env python
+# mise description="Create project from cookiecutter"
 import hashlib
 import os
 from pathlib import Path
@@ -9,7 +10,7 @@ import tempfile
 import click
 from cookiecutter.main import cookiecutter
 
-flac_proj_dpath = Path(__file__).resolve().parent
+flac_proj_dpath = Path(__file__).resolve().parent.parent
 cc_dpath = flac_proj_dpath.joinpath('flac-app-cc')
 cc_reqs_dpath = cc_dpath.joinpath('{{cookiecutter.project_folder}}', 'requirements')
 
