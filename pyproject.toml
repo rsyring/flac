@@ -1,0 +1,20 @@
+[build-system]
+requires = [
+    'hatchling',
+    'hatch-requirements-txt',
+    'hatch-regex-commit',
+]
+build-backend = 'hatchling.build'
+
+
+[project]
+name = 'Flac'
+description = 'Flask CLI library'
+authors = [
+    {name = 'Randy Syring', email = 'randy@syrings.us'},
+]
+dynamic = ['dependencies', 'optional-dependencies', 'version']
+readme = 'readme.md'
+
+[project.scripts]
+'flac-cc' = 'flac_cc:cli'
