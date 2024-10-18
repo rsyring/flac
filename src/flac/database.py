@@ -2,6 +2,7 @@ import logging
 
 from sqlalchemy_utils import functions as safunc
 
+
 log = logging.getLogger(__name__)
 
 

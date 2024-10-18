@@ -1,10 +1,8 @@
 import datetime as dt
 import logging
-from logging.handlers import SysLogHandler
-import os
-import stat
 
 from pythonjsonlogger import jsonlogger
+
 
 log = logging.getLogger(__name__)
 
@@ -15,34 +13,13 @@ LOG_STDOUT_FORMAT_STR_DEBUG = '%(levelname)s - %(name)s - %(message)s'
 def init_logging(level, appname):
     root_logger = logging.getLogger()
 
-    if level == 'debug':
-        minimum_level = logging.DEBUG
-    else:
-        minimum_level = logging.INFO
-
+    minimum_level = logging.DEBUG if level == 'debug' else logging.INFO
     root_logger.setLevel(minimum_level)
 
     init_stdout_logging(root_logger, level)
 
-    # CI image doesn't have syslog, so trying to initialize it throws an exception.
-    if f'{appname.upper()}_SYSLOG_DISABLE' not in os.environ:
-        init_syslog_logging(root_logger, minimum_level, appname)
-
-
-def init_syslog_logging(logger, minimum_level, appname):
-    handler = create_syslog_handler()
-    handler.setLevel(minimum_level)
-    logger.addHandler(handler)
-
-    # A space is needed at the end of the ident so syslog recognizes it as the
-    # app name and not part of the message.
-    handler.ident = f'{appname} '
-    handler.setFormatter(create_json_formatter())
-    handler.setLevel(minimum_level)
-
 
 def init_stdout_logging(logger, level):
-
     # always show warnings and exceptions
     error_handler = logging.StreamHandler()
     error_handler.setFormatter(logging.Formatter(LOG_STDOUT_FORMAT_STR_DEBUG))
@@ -69,34 +46,12 @@ def init_stdout_logging(logger, level):
 
 class BelowWarnings(logging.Filter):
     """
-        Don't report warnings or above.
+    Don't report warnings or above.
     """
+
     def filter(self, record):
         if record.levelno < logging.WARNING:
             return True
-
-
-def create_syslog_handler():
-    address = find_syslog_address()
-    if not address:
-        raise Exception('Could not find syslog socket')
-
-    log.debug(f'Using syslog address: {address}')
-    return SysLogHandler(address=address)
-
-
-def find_syslog_address():
-    if _is_socket('/var/run/syslog'):
-        return '/var/run/syslog'
-    if _is_socket('/dev/log'):
-        return '/dev/log'
-
-
-def _is_socket(path):
-    if not os.path.exists(path):
-        return False
-    mode = os.stat(path).st_mode
-    return stat.S_ISSOCK(mode)
 
 
 class JSONFormatter(jsonlogger.JsonFormatter):
@@ -107,7 +62,9 @@ class JSONFormatter(jsonlogger.JsonFormatter):
 
 
 def create_json_formatter():
-    format_str = '%(pathname) %(funcName) %(lineno) %(message) %(levelname)' \
+    format_str = (
+        '%(pathname) %(funcName) %(lineno) %(message) %(levelname)'
         ' %(name)s %(process) %(processName) %(message)'
+    )
     # @cee is recognized by logging parsers as a JSON string
     return JSONFormatter(format_str, prefix='@cee:')

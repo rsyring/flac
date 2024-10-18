@@ -1,5 +1,4 @@
 import logging
-import os
 import pathlib
 
 import flask
@@ -8,20 +7,20 @@ from . import testing
 from .config import init_config
 from .logging import init_logging
 
+
 log = logging.getLogger(__name__)
 
 
 class FlacApp(flask.Flask):
     test_cli_runner_class = testing.CLIRunner
-    flask_sqlalchemy_cls = None
 
     @classmethod
     def create(cls, app_name, root_path, init_app=True, testing=False, **kwargs):
         """
-            For CLI app init blueprints but not config b/c we want to give the calling CLI group
-            the ability to set values from the command line args/options before configuring the
-            app. But if we don't init the blueprints right away, then the CLI doesn't know
-            anything about the cli groups & commands added by blueprints.
+        For CLI app init blueprints but not config b/c we want to give the calling CLI group
+        the ability to set values from the command line args/options before configuring the
+        app. But if we don't init the blueprints right away, then the CLI doesn't know
+        anything about the cli groups & commands added by blueprints.
         """
         # Ensure a pathlib object so it can be assumed elsewhere
         root_path = pathlib.Path(root_path)
@@ -47,6 +46,7 @@ class FlacApp(flask.Flask):
         # TODO: this shouldn't be in the core
         if with_sentry:
             from flac.contrib.sentry import init_sentry
+
             init_sentry(self)
 
         self.on_app_ready()

@@ -3,7 +3,6 @@ import flask_sqlalchemy
 
 
 class Model(flask_sqlalchemy.Model):
-
     @classmethod
     def _db(cls):
         return flask.current_app.extensions['sqlalchemy'].db

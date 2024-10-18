@@ -1,22 +1,22 @@
 import datetime as dt
+from decimal import Decimal
 import math
 import random
 import uuid
-from decimal import Decimal
 
 import arrow
+from blazeutils.strings import randchars
 import flask
 import flask_sqlalchemy as fsa
 import sqlalchemy as sa
-import sqlalchemy.ext.compiler
-import sqlalchemy.types
-import wrapt
-from blazeutils.strings import randchars
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.dialects.postgresql import insert as pgsql_insert
+import sqlalchemy.ext.compiler
 from sqlalchemy.inspection import inspect
 from sqlalchemy.sql import expression
+import sqlalchemy.types
 from sqlalchemy_utils import ArrowType, EmailType
+import wrapt
 
 
 def flask_db() -> fsa.SQLAlchemy:
@@ -34,12 +34,12 @@ def _pg_utcnow(element, compiler, **kw):
 
 @sqlalchemy.ext.compiler.compiles(utcnow, 'mssql')
 def _ms_utcnow(element, compiler, **kw):
-    return "GETUTCDATE()"
+    return 'GETUTCDATE()'
 
 
 @sqlalchemy.ext.compiler.compiles(utcnow, 'sqlite')
 def _sqlite_utcnow(element, compiler, **kw):
-    return "CURRENT_TIMESTAMP"
+    return 'CURRENT_TIMESTAMP'
 
 
 @wrapt.decorator
@@ -55,13 +55,11 @@ def _kwargs_match_entity(wrapped, instance, args, kwargs):
         allowed_keys = {col.key for col in insp.columns} | set(insp.relationships.keys())
 
         # Ignore kwargs starting with "_"
-        kwarg_keys = set(key for key in kwargs if not key.startswith('_'))
+        kwarg_keys = {key for key in kwargs if not key.startswith('_')}
         extra_kwargs = kwarg_keys - allowed_keys
         assert (
             not extra_kwargs
-        ), 'Unknown column or relationship names in kwargs: {kwargs!r}'.format(
-            kwargs=sorted(extra_kwargs)
-        )
+        ), f'Unknown column or relationship names in kwargs: {sorted(extra_kwargs)!r}'
 
     return wrapped(*args, **kwargs)
 
@@ -159,7 +157,10 @@ might_flush = _keyword_optional('_flush', after=session_flush)
 class DefaultColsMixin:
     id = sa.Column('id', sa.Integer, primary_key=True)
     created_utc = sa.Column(
-        ArrowType, nullable=False, default=arrow.utcnow, server_default=utcnow()
+        ArrowType,
+        nullable=False,
+        default=arrow.utcnow,
+        server_default=utcnow(),
     )
     updated_utc = sa.Column(
         ArrowType,
@@ -268,8 +269,8 @@ class MethodsMixin:
         if 'randomdata' in column.info:
             if type(column.info['randomdata']) is str:
                 # assume randomdata the is name of a method on the class
-                callable = getattr(cls, column.info['randomdata'])
-                data = callable()
+                _callable = getattr(cls, column.info['randomdata'])
+                data = _callable()
                 return data
 
             return column.info['randomdata']()
@@ -297,7 +298,7 @@ class MethodsMixin:
             return randemail(min(column.type.length or 50, 50))
         # elif isinstance(column.type, columns.TimeZoneType):
         #     return random.choice(pytz.common_timezones)
-        elif isinstance(column.type, (sa.types.String, sa.types.Unicode)):
+        elif isinstance(column.type, sa.types.String | sa.types.Unicode):
             return randchars(min(column.type.length or 25, 25))
         elif isinstance(column.type, UUID):
             return uuid.uuid4()

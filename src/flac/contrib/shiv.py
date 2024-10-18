@@ -1,9 +1,10 @@
 import logging
 import os
 import pathlib
-import subprocess
 import shutil
+import subprocess
 import sys
+
 
 log = logging.getLogger(__name__)
 
@@ -11,14 +12,14 @@ SHIV_STDERR_DEBUG = 'SHIV_STDERR_DEBUG' in os.environ
 
 
 def log_debug(msg):
-    """ Log to stderr based on environment variable
+    """Log to stderr based on environment variable
 
-        The preamble will usually get called so early in the process setup that nothing else will
-        have had a chance to run yet, not even code that sets up Python logging.  This permits
-        logging to stderr if the environment variable SHIV_STDERR_DEBUG has been set.
+    The preamble will usually get called so early in the process setup that nothing else will
+    have had a chance to run yet, not even code that sets up Python logging.  This permits
+    logging to stderr if the environment variable SHIV_STDERR_DEBUG has been set.
 
-        But, we also pass the value on to the Python logging library in case the normal logging
-        faculties have been used.
+    But, we also pass the value on to the Python logging library in case the normal logging
+    faculties have been used.
     """
     log.debug(msg)
     if SHIV_STDERR_DEBUG:
@@ -34,7 +35,7 @@ def auto_cleanup():
 
 
 def shiv_info_callstack():
-    """ Maybe more brittle than shiv_info() but about 25x faster. """
+    """Maybe more brittle than shiv_info() but about 25x faster."""
     try:
         for x in range(1000):
             f = sys._getframe(x)
@@ -58,10 +59,12 @@ def cleanup_shivs(env, site_packages_dpath):
     for dpath in cache_root_dpath.iterdir():
         dir_name = dpath.name
 
-        if build_id in dir_name \
-                or len(dir_name) != dname_length \
-                or dir_name[0:-64] != dname_prefix \
-                or not dpath.is_dir():
+        if (
+            build_id in dir_name
+            or len(dir_name) != dname_length
+            or dir_name[0:-64] != dname_prefix
+            or not dpath.is_dir()
+        ):
             continue
 
         log_debug(f'Deleting {dpath} and lock file')
@@ -108,9 +111,14 @@ def build(scripts_dpath, app_name, pybin, skip_deps, pyz_name=None, reqs_fname='
         'shiv',
         '--compile-pyc',
         '--compressed',
-        '--site-packages', dist_dpath,
-        '--python', f'/usr/bin/env {pybin}',
-        '--output-file', pyz_fpath,
-        '--entry-point', f'{app_name}.app:cli',
-        '--preamble', preamble_fpath,
+        '--site-packages',
+        dist_dpath,
+        '--python',
+        f'/usr/bin/env {pybin}',
+        '--output-file',
+        pyz_fpath,
+        '--entry-point',
+        f'{app_name}.app:cli',
+        '--preamble',
+        preamble_fpath,
     )

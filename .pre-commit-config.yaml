@@ -2,7 +2,7 @@
 exclude: 'src/flac-app-cc/.*'
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-merge-conflict
       - id: check-ast
@@ -14,7 +14,7 @@ repos:
       - id: check-added-large-files
       - id: check-yaml
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.5.1
+    rev: v0.7.0
     hooks:
       # i.e. `ruff check`
       - id: ruff

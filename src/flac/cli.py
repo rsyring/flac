@@ -6,6 +6,8 @@ import flask
 import flask.cli
 
 import flac.config
+
+
 try:
     import flac.database as flac_db
 except ImportError:
@@ -14,7 +16,7 @@ except ImportError:
 
 @click.group()
 def db():
-    """ database commands """
+    """database commands"""
     if not flac_db:
         message = click.style('ERROR:', fg='red')
         message += (
@@ -29,7 +31,7 @@ def db():
 @click.option('--drop-first', is_flag=True, default=False)
 @flask.cli.with_appcontext
 def db_init(drop_first):
-    """ Create databases """
+    """Create databases"""
     app = flask.current_app
     sa_url = app.config['SQLALCHEMY_DATABASE_URI']
     flac.database.create_db(sa_url, drop_first)
@@ -38,7 +40,7 @@ def db_init(drop_first):
 @db.command('create-all')
 @flask.cli.with_appcontext
 def db_create_all():
-    """ Create new db objects """
+    """Create new db objects"""
     flask.current_app.extensions['sqlalchemy'].db.create_all()
     print('New database objects created')
 
@@ -46,7 +48,7 @@ def db_create_all():
 @click.command()
 @flask.cli.with_appcontext
 def config_info():
-    """ Show config info """
+    """Show config info"""
     app = flask.current_app
     print(f'app.name: {app.name}')
     print(f'app.debug: {app.debug}')
@@ -63,7 +65,6 @@ def config_info():
 
 
 class FlacGroup(flask.cli.FlaskGroup):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.add_command(db)
@@ -71,18 +72,32 @@ class FlacGroup(flask.cli.FlaskGroup):
 
 
 def cli_entry(flac_app_cls):
-
     def inner(wrapped):
         wrapped = flask.cli.pass_script_info(wrapped)
-        wrapped = click.option('--log-quiet', 'log_level', flag_value='quiet',
-            help='Hide info level log messages')(wrapped)
-        wrapped = click.option('--log-info', 'log_level', flag_value='info', default=True,
-            help='Show info level log messages (default)')(wrapped)
-        wrapped = click.option('--log-debug', 'log_level', flag_value='debug',
-            help='Show debug level log messages')(wrapped)
-        wrapped = click.option('--config-profile',
-            help='Name of configuration profile to load')(wrapped)
-        return click.group(cls=FlacGroup,
-            create_app=lambda: flac_app_cls.create(init_app=False))(wrapped)
+        wrapped = click.option(
+            '--log-quiet',
+            'log_level',
+            flag_value='quiet',
+            help='Hide info level log messages',
+        )(wrapped)
+        wrapped = click.option(
+            '--log-info',
+            'log_level',
+            flag_value='info',
+            default=True,
+            help='Show info level log messages (default)',
+        )(wrapped)
+        wrapped = click.option(
+            '--log-debug',
+            'log_level',
+            flag_value='debug',
+            help='Show debug level log messages',
+        )(wrapped)
+        wrapped = click.option('--config-profile', help='Name of configuration profile to load')(
+            wrapped,
+        )
+        return click.group(cls=FlacGroup, create_app=lambda: flac_app_cls.create(init_app=False))(
+            wrapped,
+        )
 
     return inner
