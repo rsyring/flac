@@ -2,6 +2,12 @@
 [build]
 dev-mode-dirs = ['src']
 
+[build.targets.sdist]
+directory = 'tmp/dist'
+
+[build.targets.wheel]
+directory = 'tmp/dist'
+packages = ['src/flac']
 
 ## Dependencies
 [metadata.hooks.requirements_txt]
