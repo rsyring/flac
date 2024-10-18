@@ -1,11 +1,10 @@
-
 def default_config(app, config):
-    config['default'] = 1
+    config['default'] = 3
 
     return config
 
 
 def foo_config(app, config):
-    config['foo'] = 2
+    config['foo2'] = 4
 
     return config

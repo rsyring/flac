@@ -1,13 +1,14 @@
-import pathlib
 import os
+from pathlib import Path
 from unittest import mock
 
 import pytest
 
-from flac.app import FlacApp
 from flac import config
+from flac.app import FlacApp
 
-data_dpath = pathlib.Path(__file__).parent / 'data'
+
+data_dpath = Path(__file__).parent / 'data'
 
 
 @pytest.fixture
@@ -18,11 +19,11 @@ def app():
 class TestConfig:
     def test_app_config_files(self, app):
         with mock.patch.dict(os.environ, {'HOME': '~'}):
-            fpaths = config.app_config_fpaths(app)
+            fpaths = config.app_config_fpaths(app, {})
             assert fpaths == [
-                '/etc/confapp/config.py',
-                '~/.config/confapp/config.py',
-                str(app.root_path.parent.resolve() / 'confapp-config.py')
+                Path('/etc/confapp/config.py'),
+                Path('~/.config/confapp/config.py'),
+                Path(app.root_path.parent.resolve(), 'confapp-config.py'),
             ]
 
     def test_load_fpath_config(self, app):
@@ -44,7 +45,7 @@ class TestConfig:
     def test_environ_config(self):
         with mock.patch.dict(os.environ, {'FOO_BAR': 'baz'}):
             assert config.environ_config('foo') == {
-                'BAR': 'baz'
+                'BAR': 'baz',
             }
 
     def test_config_applied(self):

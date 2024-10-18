@@ -1,8 +1,7 @@
 import click
+from click.testing import CliRunner
 import flask
 import pytest
-
-from click.testing import CliRunner
 
 from flac.app import FlacApp
 from flac.cli import cli_entry
@@ -30,7 +29,7 @@ def cli():
 
     @cli_entry(HelloApp)
     @click.option('--some-thing', is_flag=True, default=False)
-    def cli(scriptinfo, log_level, some_thing):
+    def cli(scriptinfo, config_profile, log_level, some_thing):
         app = scriptinfo.load_app()
         app.init_app(log_level)
         if some_thing:
@@ -40,9 +39,8 @@ def cli():
 
 
 class TestFlacGroup:
-
     def test_log_level_opt(self, cli):
-        result = CliRunner().invoke(cli, ['--quiet', 'hello'], catch_exceptions=False)
+        result = CliRunner().invoke(cli, ['--log-quiet', 'hello'], catch_exceptions=False)
         assert 'log level: quiet' in result.output
 
     def test_hello_and_defaults(self, cli):
