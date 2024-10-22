@@ -15,7 +15,7 @@ files = ['requirements/base.txt']
 
 [metadata.hooks.requirements_txt.optional-dependencies]
 dev = ['requirements/dev.txt']
-
+sqlalchemy = ['requirements/sqlalchemy.txt']
 
 ## Env: default
 [envs.default]

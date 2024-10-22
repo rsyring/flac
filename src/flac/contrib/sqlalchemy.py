@@ -1,18 +1,23 @@
+from collections import defaultdict
 import datetime as dt
 from decimal import Decimal
 import math
 import random
+from typing import Self
 import uuid
 
 import arrow
 from blazeutils.strings import randchars
+import faker
 import flask
 import flask_sqlalchemy as fsa
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.dialects.postgresql import insert as pgsql_insert
 import sqlalchemy.ext.compiler
 from sqlalchemy.inspection import inspect
+from sqlalchemy.orm import RelationshipProperty
 from sqlalchemy.sql import expression
 import sqlalchemy.types
 from sqlalchemy_utils import ArrowType, EmailType
@@ -219,9 +224,19 @@ class MethodsMixin:
         """
         return cls.query.filter_by(**kwargs).one_or_none()
 
+    @might_commit
+    @might_flush
+    @classmethod
+    def add(cls, **kwargs):
+        obj = cls(**kwargs)
+        cls._db().session.add(obj)
+        return obj
+
+
+class FakeDataMixin:
     @_kwargs_match_entity
     @classmethod
-    def testing_data(cls, **kwargs):
+    def fake_data(cls, **kwargs):
         """Create an object for testing with default data appropriate for the field type
         * Will automatically set most field types ignoring those passed in via kwargs.
         * Subclasses that have foreign key relationships should setup those relationships before
@@ -247,25 +262,17 @@ class MethodsMixin:
             )
 
         for column in (col for col in insp.columns if not skippable(col)):
-            kwargs[column.key] = cls.random_data_for_column(column, numeric_range)
+            kwargs[column.key] = cls.fake_data_for_column(column, numeric_range)
 
         return kwargs
 
     @_kwargs_match_entity
     @classmethod
-    def testing_create(cls, **kwargs):
-        return cls.add(**cls.testing_data(**kwargs))
-
-    @might_commit
-    @might_flush
-    @classmethod
-    def add(cls, **kwargs):
-        obj = cls(**kwargs)
-        cls._db().session.add(obj)
-        return obj
+    def fake(cls, **kwargs):
+        return cls.add(**cls.fake_data(**kwargs))
 
     @classmethod
-    def random_data_for_column(cls, column, numeric_range):
+    def fake_data_for_column(cls, column, numeric_range):
         if 'randomdata' in column.info:
             if type(column.info['randomdata']) is str:
                 # assume randomdata the is name of a method on the class
@@ -304,3 +311,181 @@ class MethodsMixin:
             return uuid.uuid4()
 
         raise ValueError(f'No randomization for this column available {column}')
+
+
+class FakerMixin:
+    # Sentinal value
+    FAKE_IT = ()
+    fake_max_text_length = 32
+    _fake = faker.Faker(locale='en_US')
+
+    @classmethod
+    def _fake_relation_kwargs(cls, kwargs, remove_rel_keys):
+        retval = defaultdict(dict)
+
+        for key in list(kwargs.keys()):
+            match key.split('__', 1):
+                case [relation_name, relation_key]:
+                    retval[relation_name][relation_key] = (
+                        kwargs.pop(key) if remove_rel_keys else kwargs.get(key)
+                    )
+                case _:
+                    pass
+
+        return retval
+
+    @classmethod
+    def fake(cls, **kwargs) -> Self:
+        relation_kwargs = cls._fake_relation_kwargs(kwargs, remove_rel_keys=True)
+
+        insp = sa.inspection.inspect(cls)
+
+        col: sa.Column
+        for col in insp.columns:
+            if cls.fake_col_skip(col, kwargs, relation_kwargs):
+                continue
+            kwargs[col.key] = cls.fake_col_val(col, kwargs)
+
+        rel: RelationshipProperty
+        for key, rel in insp.relationships.items():
+            kwargs = cls.fake_relationship(key, rel, kwargs, relation_kwargs)
+
+        return cls.add(**kwargs)
+
+    @classmethod
+    def fake_col_skip(cls, col: sa.Column, fake_kwargs, relation_kwargs):
+        given_value = fake_kwargs.get(col.key)
+        if given_value is cls.FAKE_IT or col.key in relation_kwargs:
+            return False
+
+        return (
+            col.key in fake_kwargs
+            or col.default
+            or col.foreign_keys
+            or col.server_default
+            or col.nullable
+            or (
+                col.primary_key
+                and isinstance(col.type, sa.Integer)
+                and col.autoincrement in (True, 'auto')
+            )
+        )
+
+    @classmethod
+    def fake_col_val(cls, col, fake_kwargs):
+        # TODO: limit based on custom range for the class or column
+        min_num = -(2**16)
+        max_num = 2**16 - 1
+
+        if isinstance(col.type, sa.Integer):
+            if isinstance(col.type, sa.SmallInteger):
+                return cls._fake.random_int(-100, 100)
+            return cls._fake.random_int(min_num, max_num)
+
+        if isinstance(col.type, sa.Date):
+            # NOTE: faker has a date() method, but it returns a string, which doesn't work with
+            # sqlite.
+            return cls._fake.date_time().date()
+
+        if isinstance(col.type, sa.DateTime):
+            return cls._fake.date_time()
+
+        if isinstance(col.type, sa.Float):
+            return random.uniform(min_num, max_num)
+
+        if isinstance(col.type, sa.Numeric):
+            max_val = 10 ** (col.type.precision - col.type.scale)
+            left_digits = col.type.precision - col.type.scale
+            return cls._fake.pydecimal(
+                left_digits,
+                col.type.scale,
+                min_value=-max_val,
+                max_value=max_val,
+            )
+
+        if isinstance(col.type, sa.Boolean):
+            return cls._fake.pybool()
+
+        if isinstance(col.type, sa.Enum):
+            return random.choice(col.type.enums)
+
+        if isinstance(col.type, ArrowType):
+            return arrow.utcnow()
+
+        if isinstance(col.type, EmailType):
+            return randemail(min(col.type.length or 50, 50))
+
+        if isinstance(col.type, postgresql.UUID | sa.UUID):
+            return uuid.uuid4()
+
+        if isinstance(col.type, sa.String | sa.Unicode):
+            # TODO: could use fake.unique to ensure unique values.  Would need to setup a pytest
+            # autouse fixture to reset it after each test.
+            col_length = col.type.length
+            max_length = min(
+                cls.fake_max_text_length if col_length is None else col_length,
+                cls.fake_max_text_length,
+            )
+            return randchars(max_length)
+
+        raise ValueError(f"Can't fake value for: {col}, type: {type(col.type)}")
+
+    @classmethod
+    def fake_relationship(
+        cls,
+        key: str,
+        rel: RelationshipProperty,
+        fake_kwargs: dict,
+        relation_kwargs: dict,
+    ):
+        rel_kwargs = relation_kwargs.get(key, {})
+        rel_val_given = fake_kwargs.get(key)
+        rel_required = any(not col.nullable for col in rel.local_columns)
+        rel_cols_given = [col.key for col in rel.local_columns if col.key in fake_kwargs]
+
+        if rel_kwargs and rel_val_given:
+            raise ValueError(
+                f"Value for '{key}' given but kwargs given for it also: {rel_kwargs}",
+            )
+
+        if rel_cols_given and rel_val_given:
+            raise ValueError(
+                f"Value for '{key}' given but the relationship's FK columns were also given:"
+                f' {rel_cols_given}',
+            )
+
+        if rel_cols_given and rel_kwargs:
+            raise ValueError(
+                f"Relationship kwargs given ({rel_kwargs}) but the relationship's FK columns were"
+                f' also given: {rel_cols_given}',
+            )
+
+        if rel_cols_given:
+            return fake_kwargs
+
+        # If FAKE_IT is specified for the field, we need to generate the related object
+        if rel_val_given is cls.FAKE_IT:
+            rel_val_given = None
+            rel_required = True
+
+        if rel_val_given:
+            fake_kwargs[key] = rel_val_given
+        elif rel_required or rel_kwargs:
+            rel_obj = rel.mapper.class_.fake(**rel_kwargs)
+            fake_kwargs[key] = rel_obj
+
+        return fake_kwargs
+
+
+@wrapt.decorator
+def session_execute(wrapped, instance: MethodsMixin, args, kwargs):
+    # Call the original method to get the statement
+    statement = wrapped(*args, **kwargs)
+    return instance._db().session.execute(statement)
+
+
+@wrapt.decorator
+def session_scalars(wrapped, instance: MethodsMixin, args, kwargs):
+    # Call the original method to get the statement
+    statement = wrapped(*args, **kwargs)
+    return instance._db().session.scalars(statement)

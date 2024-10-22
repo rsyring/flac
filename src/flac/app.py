@@ -1,5 +1,6 @@
 import logging
 import pathlib
+from typing import Self
 
 import flask
 
@@ -15,7 +16,7 @@ class FlacApp(flask.Flask):
     test_cli_runner_class = testing.CLIRunner
 
     @classmethod
-    def create(cls, app_name, root_path, init_app=True, testing=False, **kwargs):
+    def create(cls, app_name, root_path, init_app=True, testing=False, **kwargs) -> Self:
         """
         For CLI app init blueprints but not config b/c we want to give the calling CLI group
         the ability to set values from the command line args/options before configuring the
