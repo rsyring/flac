@@ -41,7 +41,7 @@ def db_init(drop_first):
 @flask.cli.with_appcontext
 def db_create_all():
     """Create new db objects"""
-    flask.current_app.extensions['sqlalchemy'].db.create_all()
+    flask.current_app.extensions['sqlalchemy'].create_all()
     print('New database objects created')
 
 
