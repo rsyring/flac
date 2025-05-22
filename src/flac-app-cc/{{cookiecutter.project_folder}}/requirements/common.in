@@ -1,7 +1,7 @@
 # app
-appdirs
 {{ cookiecutter.flac_req_spec }}
 flask
+platformdirs
 python-dotenv
 python-json-logger
 

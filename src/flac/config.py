@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-import appdirs
+import platformdirs
 
 from . import app
 
@@ -18,6 +18,12 @@ def build_config(app: 'app.FlacApp', profile_name: str):
         profile_name = 'testing'
     elif not profile_name and app.debug:
         profile_name = 'development'
+
+    if not profile_name:
+        raise ValueError(
+            f'The configuration profile must be set with {environ_key(app.name, "CONFIG_PROFILE")}'
+            ' or the --config-profile CLI option when app.testing and app.debug are both False.',
+        )
 
     # TODO: set default_config on the app and then call it as app.default_config so that
     # it can be easily overriden.
@@ -70,7 +76,7 @@ def app_config_fpaths(app, config):
     config_fpaths = [
         # TODO: should work on Windows too
         Path(f'/etc/{app.name}/config.py'),
-        Path(appdirs.user_config_dir(app.name), 'config.py'),
+        Path(platformdirs.user_config_dir(app.name), 'config.py'),
         Path(app.root_path.parent.resolve(), f'{app.name}-config.py'),
     ]
     env_config_fpath = config.get('CONFIG_FILE')
