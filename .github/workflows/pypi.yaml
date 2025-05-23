@@ -5,7 +5,7 @@
 # Environment protection
 #  - https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment
 # Separate build & release
-name: pypi publish
+name: PyPI publish
 
 on:
   push:
