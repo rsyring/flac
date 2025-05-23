@@ -1,4 +1,7 @@
 # Flac
+[![mive](https://github.com/rsyring/flac/actions/workflows/nox.yaml/badge.svg)](https://github.com/rsyring/flac/actions/workflows/nox.yaml)
+[![app](https://github.com/rsyring/flac/actions/workflows/pypi.yaml/badge.svg)](https://github.com/rsyring/flac/actions/workflows/pypi.yaml)
+![pypi-version](https://img.shields.io/pypi/v/flask-flac)
 
 Flask based library to help structure an application with an eye towards CLI apps, not just web.
 
