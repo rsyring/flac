@@ -1,5 +1,8 @@
-#!/bin/env python
-# mise description="Create project from cookiecutter"
+#!/usr/bin/env -S uv run --script
+# mise description="Create Flac based app project from cookiecutter"
+# /// script
+# dependencies = ["cookiecutter"]
+# ///
 import hashlib
 import os
 from pathlib import Path
@@ -9,6 +12,7 @@ import tempfile
 
 import click
 from cookiecutter.main import cookiecutter
+
 
 flac_proj_dpath = Path(__file__).resolve().parent.parent
 cc_dpath = flac_proj_dpath.joinpath('flac-app-cc')
@@ -38,8 +42,7 @@ class VEnv:
     def __init__(self, app_path):
         self.app_path = app_path
         app_hash = hashlib.sha1(bytes(app_path)).hexdigest()
-        self.venv_path = Path(tempfile.gettempdir()) \
-            / f'{app_path.name}-{app_hash}'
+        self.venv_path = Path(tempfile.gettempdir()) / f'{app_path.name}-{app_hash}'
         self.echo_hc_venv = True
 
     def ensure_exists(self):
@@ -88,16 +91,22 @@ def cli():
 def create(target_dpath, run_tests, no_input, overwrite, flac_rec_local, no_pre_commit, replay):
     extra_context = {}
     if flac_rec_local and replay:
-        echo('Replay will include the previous value for the flac requirement.  Don\'t use'
-             ' --flac-rec-local with --replay.')
+        echo(
+            "Replay will include the previous value for the flac requirement.  Don't use"
+            ' --flac-rec-local with --replay.',
+        )
         return
 
     if flac_rec_local:
         extra_context['flac_req_spec'] = f'-e {flac_proj_dpath}'
         extra_context['flac_req_spec_shiv'] = flac_proj_dpath
 
-    cc_kwargs = dict(output_dir=target_dpath, no_input=no_input, overwrite_if_exists=overwrite,
-                     replay=replay)
+    cc_kwargs = dict(
+        output_dir=target_dpath,
+        no_input=no_input,
+        overwrite_if_exists=overwrite,
+        replay=replay,
+    )
 
     if extra_context:
         cc_kwargs['extra_context'] = extra_context

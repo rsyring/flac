@@ -1,11 +1,15 @@
-# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: v1.20241001.1
+# Changes here will be overwritten by Copier
+#
+# Updating `_src` could be helpful, see notes at:
+# https://github.com/level12/coppy/wiki#creating-a-project
+#
+# Otherwise, NEVER EDIT MANUALLY
+_commit: v1.20250226.2
 _src_path: gh:level12/copier-py-package
 author_email: randy@syrings.us
 author_name: Randy Syring
+hatch_version_tag_sign: true
 project_name: Flac
 py_module: flac
 python_version: '3.12'
 script_name: flac
-use_pipx: false
-virtualenv_name: flac

@@ -1,7 +1,11 @@
-[tools]
-python = "3.12"
-
-
 [env]
-_.python.venv.path = "{{ get_env(name='WORKON_HOME', default='/tmp') }}/flac"
+PROJECT_SLUG = '{{ config_root | basename | slugify }}'
+
+_.python.venv.path = '{% if env.UV_PROJECT_ENVIRONMENT %}{{ env.UV_PROJECT_ENVIRONMENT }}{% else %}.venv{% endif %}'
 _.python.venv.create = true
+
+
+[task_config]
+includes = [
+    'tasks',
+]
