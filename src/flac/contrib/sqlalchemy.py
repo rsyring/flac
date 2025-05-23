@@ -7,7 +7,6 @@ from typing import Self
 import uuid
 
 import arrow
-from blazeutils.strings import randchars
 import faker
 import flask
 import flask_sqlalchemy as fsa
@@ -22,6 +21,8 @@ from sqlalchemy.sql import expression
 import sqlalchemy.types
 from sqlalchemy_utils import ArrowType, EmailType
 import wrapt
+
+from flac.utils import randchars
 
 
 def flask_db() -> fsa.SQLAlchemy:
@@ -62,9 +63,9 @@ def _kwargs_match_entity(wrapped, instance, args, kwargs):
         # Ignore kwargs starting with "_"
         kwarg_keys = {key for key in kwargs if not key.startswith('_')}
         extra_kwargs = kwarg_keys - allowed_keys
-        assert (
-            not extra_kwargs
-        ), f'Unknown column or relationship names in kwargs: {sorted(extra_kwargs)!r}'
+        assert not extra_kwargs, (
+            f'Unknown column or relationship names in kwargs: {sorted(extra_kwargs)!r}'
+        )
 
     return wrapped(*args, **kwargs)
 
@@ -124,9 +125,9 @@ def randemail(length, randomizer=randchars):
 
     half = (length - 2 - 3) / 2.0  # 2 characters for @ and . and 3 for TLD
     return (
-        randomizer(int(math.floor(half)), 'alphanumeric')
+        randomizer(math.floor(half), 'alphanumeric')
         + '@'
-        + randomizer(int(math.ceil(half)), 'alphanumeric')
+        + randomizer(math.ceil(half), 'alphanumeric')
         + '.'
         + randomizer(3, 'alpha')
     )

@@ -52,3 +52,12 @@ class TestConfig:
         with mock.patch.dict(config.os.environ, {'CONFAPP_BAR': 'baz'}):
             app = FlacApp.create('confapp', '/some/fake/dir', testing=True)
             assert app.config['BAR'] == 'baz'
+
+    def test_no_profile_error(self):
+        with pytest.raises(ValueError) as exc_ctx:
+            FlacApp.create('confapp', '/some/fake/dir')
+        assert (
+            str(exc_ctx.value)
+            == 'The configuration profile must be set with CONFAPP_CONFIG_PROFILE or the'
+            ' --config-profile CLI option when app.testing and app.debug are both False.'
+        )

@@ -4,8 +4,7 @@ from typing import Self
 
 import flask
 
-from . import testing
-from .config import init_config
+from . import config, testing
 from .logging import init_logging
 
 
@@ -16,7 +15,15 @@ class FlacApp(flask.Flask):
     test_cli_runner_class = testing.CLIRunner
 
     @classmethod
-    def create(cls, app_name, root_path, init_app=True, testing=False, **kwargs) -> Self:
+    def create(
+        cls,
+        app_name,
+        root_path,
+        init_app=True,
+        testing=False,
+        config_profile=None,
+        **kwargs,
+    ) -> Self:
         """
         For CLI app init blueprints but not config b/c we want to give the calling CLI group
         the ability to set values from the command line args/options before configuring the
@@ -31,7 +38,7 @@ class FlacApp(flask.Flask):
 
         app.init_blueprints()
         if init_app:
-            app.init_app(None)
+            app.init_app(config_profile)
 
         return app
 
@@ -39,7 +46,7 @@ class FlacApp(flask.Flask):
         pass
 
     def init_app(self, config_profile, log_level='info', with_sentry=False):
-        init_config(self, config_profile)
+        config.init_config(self, config_profile)
 
         if not self.testing:
             init_logging(log_level, self.name)

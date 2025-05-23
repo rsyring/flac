@@ -1,7 +1,7 @@
 import datetime as dt
 import logging
 
-from pythonjsonlogger import jsonlogger
+from pythonjsonlogger import json as jsonlogger
 
 
 log = logging.getLogger(__name__)

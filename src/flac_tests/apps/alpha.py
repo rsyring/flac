@@ -47,8 +47,8 @@ _rel_cascade = 'all, delete-orphan'
 def delete_all():
     Project.delete_all()
     Bag.delete_all()
-    Category.delete_all()
     Blog.delete_all()
+    Category.delete_all()
 
 
 class Project(EntityMixin, db.Model):
