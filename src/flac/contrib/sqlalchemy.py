@@ -349,6 +349,11 @@ class FakerMixin:
 
         rel: RelationshipProperty
         for key, rel in insp.relationships.items():
+            # Skip relationships on the parent side.  We are only concerned with faking parents
+            # for children that need the parent to exist.
+            if rel.direction == sa.orm.interfaces.ONETOMANY:
+                continue
+
             kwargs = cls.fake_relationship(key, rel, kwargs, relation_kwargs)
 
         return cls.add(**kwargs)
