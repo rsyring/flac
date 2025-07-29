@@ -7,7 +7,6 @@ from typing import Self
 import uuid
 
 import arrow
-import faker
 import flask
 import flask_sqlalchemy as fsa
 import sqlalchemy as sa
@@ -21,6 +20,12 @@ from sqlalchemy.sql import expression
 import sqlalchemy.types
 from sqlalchemy_utils import ArrowType, EmailType
 import wrapt
+
+
+try:
+    import faker
+except ImportError:
+    faker = None
 
 from flac.utils import randchars
 
@@ -318,7 +323,7 @@ class FakerMixin:
     # Sentinal value
     FAKE_IT = ()
     fake_max_text_length = 32
-    _fake = faker.Faker(locale='en_US')
+    _fake = faker.Faker(locale='en_US') if faker else None
 
     @classmethod
     def _fake_relation_kwargs(cls, kwargs, remove_rel_keys):
