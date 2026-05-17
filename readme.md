@@ -1,7 +1,5 @@
 # Flac
-[![mive](https://github.com/rsyring/flac/actions/workflows/nox.yaml/badge.svg)](https://github.com/rsyring/flac/actions/workflows/nox.yaml)
-[![app](https://github.com/rsyring/flac/actions/workflows/pypi.yaml/badge.svg)](https://github.com/rsyring/flac/actions/workflows/pypi.yaml)
-[![pypi-version](https://img.shields.io/pypi/v/flask-flac)](https://pypi.org/project/flask-flac/)
+[![nox](https://github.com/rsyring/flac/actions/workflows/nox.yaml/badge.svg)](https://github.com/rsyring/flac/actions/workflows/nox.yaml)
 
 Flask based library to help structure an application with an eye towards CLI apps, not just web.
 
@@ -44,13 +42,15 @@ Flask based library to help structure an application with an eye towards CLI app
 
 ## Develoment
 
+
 ### Copier Template
 
 Project structure and tooling mostly derives from the [Coppy](https://github.com/level12/coppy),
 see its documentation for context and additional instructions.
 
 This project can be updated from the upstream repo, see
-[Updating a Project](https://github.com/level12/coppy?tab=readme-ov-file#updating-a-project).
+[Updating a Project](https://github.com/level12/coppy?tab=readme-ov-file#template-updates).
+
 
 ### Project Setup
 
@@ -66,13 +66,14 @@ From zero to hero (passing tests that is):
 
    `uv sync`
 
-4. Configure pre-commit:
+4. Configure prek:
 
-   `pre-commit install`
+   `prek install`
 
 5. Run tests:
 
    `nox`
+
 
 ### Versions
 

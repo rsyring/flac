@@ -4,12 +4,17 @@
 # https://github.com/level12/coppy/wiki#creating-a-project
 #
 # Otherwise, NEVER EDIT MANUALLY
-_commit: v1.20250226.2
-_src_path: gh:level12/copier-py-package
+_commit: v1.20251025.1-16-g72e190a
+_src_path: gh:level12/coppy
 author_email: randy@syrings.us
 author_name: Randy Syring
+gh_org: rsyring
+gh_repo: flac
 hatch_version_tag_sign: true
 project_name: Flac
 py_module: flac
 python_version: '3.12'
+python_version_min: '3.11'
 script_name: flac
+use_circleci: true
+use_gh_nox: true

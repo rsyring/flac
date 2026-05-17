@@ -1,6 +1,13 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
+omit =
+    src/flac/version.py
+
+source =
+    src/flac
+    tests/flac_tests
+
 
 [report]
 # Regexes for lines to exclude from consideration
@@ -14,5 +21,6 @@ exclude_lines =
     # patterns for running cli
     cli_entry()
 
+
 [html]
-directory = ci/coverage-html
+directory = tmp/coverage-html
