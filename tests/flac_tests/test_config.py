@@ -18,11 +18,15 @@ def app():
 
 class TestConfig:
     def test_app_config_files(self, app):
-        with mock.patch.dict(os.environ, {'HOME': '~'}):
+        with mock.patch.object(
+            config.platformdirs,
+            'user_config_dir',
+            return_value='/home/test/.config/confapp',
+        ):
             fpaths = config.app_config_fpaths(app, {})
             assert fpaths == [
                 Path('/etc/confapp/config.py'),
-                Path('~/.config/confapp/config.py'),
+                Path('/home/test/.config/confapp/config.py'),
                 Path(app.root_path.parent.resolve(), 'confapp-config.py'),
             ]
 
