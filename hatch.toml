@@ -8,3 +8,6 @@ directory = 'tmp/dist'
 [build.targets.wheel]
 directory = 'tmp/dist'
 packages = ['src/flac']
+
+[version]
+path = 'src/flac/version.py'
