@@ -39,7 +39,7 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Install Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -48,14 +48,10 @@ jobs:
         echo "Python path `which python`"
         python --version
 
-        python -m pip install -U pip
+        python -m pip install -U pip build
         pip --version
 
-        python -m pip install hatch
-        hatch --version
-
-        echo "Project version: `hatch version`"
-        hatch build
+        python -m build --outdir tmp/dist
 
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1

@@ -8,13 +8,3 @@ directory = 'tmp/dist'
 [build.targets.wheel]
 directory = 'tmp/dist'
 packages = ['src/flac']
-
-## Env: default
-[envs.default]
-installer = "uv"
-
-
-## Version
-[version]
-source = 'regex_commit'
-path = 'src/flac/version.py'
