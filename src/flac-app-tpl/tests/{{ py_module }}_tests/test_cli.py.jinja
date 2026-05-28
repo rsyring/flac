@@ -1,0 +1,16 @@
+import subprocess
+
+
+class TestCli:
+    def test_hello(self, cli):
+        result = cli.invoke('hello')
+        assert result.output == 'Hello, World!\n'
+
+        result = cli.invoke('hello', 'pyweb')
+        assert result.output == 'Hello, pyweb!\n'
+
+    def test_log_level_option(self, script_args):
+        result = subprocess.run([*script_args, '--log-debug', 'hello'], capture_output=True, check=True)
+
+        assert result.stdout == b'Hello, World!\n'
+        assert b'DEBUG - {{ py_module }}.cli - cli debug logging example' in result.stderr

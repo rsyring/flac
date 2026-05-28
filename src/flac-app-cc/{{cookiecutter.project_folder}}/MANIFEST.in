@@ -1,4 +1,0 @@
-# TODO: not needed when using flit backend?
-global-exclude *.pyc
-include *.rst
-include *.md

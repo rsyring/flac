@@ -1,0 +1,41 @@
+import sqlalchemy as sa
+from sqlalchemy import orm
+
+from {{ py_module }}.ext import db
+
+from .utils import EntityMixin
+
+
+_rel_cascade = 'all, delete-orphan'
+
+
+class Post(EntityMixin, db.Model):
+    __tablename__ = 'posts'
+
+    title = sa.Column(sa.String, nullable=False)
+    author = sa.Column(sa.String, nullable=False)
+    body = sa.Column(sa.String, nullable=False)
+
+    comments = orm.relationship(
+        'Comment',
+        cascade=_rel_cascade,
+        passive_deletes=True,
+        back_populates='post',
+    )
+
+    def __repr__(self):
+        return f'<Post {self.id}: {self.title[0:50]}>'
+
+
+class Comment(EntityMixin, db.Model):
+    __tablename__ = 'comments'
+
+    title = sa.Column(sa.String, nullable=False)
+    author = sa.Column(sa.String, nullable=False)
+    body = sa.Column(sa.String, nullable=False)
+
+    post_id = sa.Column(sa.Integer, sa.ForeignKey(Post.id, ondelete='cascade'), nullable=False)
+    post = orm.relationship(Post, back_populates='comments')
+
+    def __repr__(self):
+        return f'<Comment {self.id}: {self.title[0:50]}>'

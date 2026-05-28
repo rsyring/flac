@@ -1,7 +1,7 @@
 line-length = 100
 target-version = 'py312'
 output-format = 'concise'
-extend-exclude = ['src/flac-app-cc']
+extend-exclude = ['src/flac-app-tpl']
 
 [format]
 line-ending = 'lf'

@@ -1,0 +1,74 @@
+_min_copier_version: '9.5.0'
+_answers_file: .copier-answers-flac.yaml
+_subdirectory: src/flac-app-tpl
+
+project_name:
+  type: str
+  help: FLAC app/package name (letters, numbers, dashes, underscores, and dots only)
+  validator: >-
+    {% if not (project_name | regex_search('^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?$')) %}
+    project_name must use only letters, numbers, dots, underscores, and dashes.
+    {% endif %}
+
+py_module:
+  type: str
+  help: Package import name (for `import NAME` in Python code)
+  default: "{{ project_name | lower | replace(' ', '_') | replace('-', '_') | replace('.', '_') }}"
+  validator: >-
+    {% if not (py_module | regex_search('^[a-z_][a-z0-9_]*$')) %}
+    py_module must be a valid Python package name using only lowercase letters, numbers, and underscores.
+    {% endif %}
+
+script_name:
+  type: str
+  default: "{{ py_module | replace('_', '-') }}"
+  validator: >-
+    {% if not (script_name | regex_search('^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?$')) %}
+    script_name must use only letters, numbers, dots, underscores, and dashes.
+    {% endif %}
+  when: false
+
+generate_pyproject:
+  type: bool
+  help: Generate a minimal standalone pyproject.toml?
+  default: false
+
+project_class:
+  type: str
+  default: "{{ py_module | replace('_', ' ') | title | replace(' ', '') }}"
+  validator: >-
+    {% if not (project_class | regex_search('^[A-Z][A-Za-z0-9]*$')) %}
+    project_class must be a valid PascalCase Python class name.
+    {% endif %}
+  when: false
+
+_tasks:
+  - command:
+      - env
+      - -u
+      - UV_PYTHON
+      - -u
+      - UV_PROJECT_ENVIRONMENT
+      - -u
+      - VIRTUAL_ENV
+      - uv
+      - add
+      - flask-flac[sqlalchemy]
+      - gunicorn
+    when: "{{ _copier_operation == 'copy' }}"
+  - command:
+      - env
+      - -u
+      - UV_PYTHON
+      - -u
+      - UV_PROJECT_ENVIRONMENT
+      - -u
+      - VIRTUAL_ENV
+      - uv
+      - add
+      - --group
+      - pytest
+      - pytest
+      - pytest-cov
+      - faker
+    when: "{{ _copier_operation == 'copy' }}"

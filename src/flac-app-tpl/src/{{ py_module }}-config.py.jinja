@@ -1,0 +1,20 @@
+from pathlib import Path
+
+
+tmp_dpath = Path(__file__).resolve().parent.parent / 'tmp'
+tmp_dpath.mkdir(exist_ok=True)
+
+
+def db_uri(suffix: str = '') -> str:
+    db_fpath = tmp_dpath / f'{{ py_module }}{suffix}.sqlite3'
+    return f'sqlite:///{db_fpath}'
+
+
+def development_config(app, config):
+    config['SQLALCHEMY_DATABASE_URI'] = db_uri()
+    return config
+
+
+def testing_config(app, config):
+    config['SQLALCHEMY_DATABASE_URI'] = db_uri('-tests')
+    return config

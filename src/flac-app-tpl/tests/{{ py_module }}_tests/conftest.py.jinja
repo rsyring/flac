@@ -1,0 +1,33 @@
+import sys
+
+import pytest
+
+import {{ py_module }}.app
+import {{ py_module }}.ext
+
+
+@pytest.fixture(scope='session')
+def app():
+    return {{ py_module }}.app.{{ project_class }}.create(testing=True)
+
+
+@pytest.fixture()
+def db(app):
+    with app.app_context():
+        yield {{ py_module }}.ext.db
+        {{ py_module }}.ext.db.session.remove()
+
+
+@pytest.fixture()
+def web(app):
+    return app.test_client()
+
+
+@pytest.fixture()
+def cli(app):
+    return app.test_cli_runner()
+
+
+@pytest.fixture(scope='session')
+def script_args():
+    return [sys.executable, '-m', '{{ py_module }}', '--config-profile', 'testing']

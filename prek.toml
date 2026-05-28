@@ -2,7 +2,7 @@
 # See https://prek.j178.dev for more information.
 #:schema https://www.schemastore.org/prek.json
 
-exclude = "src/flac-app-cc/.*"
+exclude = "src/flac-app-tpl/.*"
 
 [[repos]]
 repo = "https://github.com/pre-commit/pre-commit-hooks"

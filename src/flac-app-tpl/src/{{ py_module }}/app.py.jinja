@@ -1,0 +1,37 @@
+from pathlib import Path
+
+import click
+import flac.app
+import flac.cli
+
+import {{ py_module }}.cli
+import {{ py_module }}.ext
+import {{ py_module }}.views
+
+
+app_dpath = Path(__file__).parent
+
+
+class {{ project_class }}(flac.app.FlacApp):
+    @classmethod
+    def create(cls, **kwargs):
+        return super().create('{{ py_module }}', app_dpath, **kwargs)
+
+    def init_blueprints(self):
+        self.register_blueprint({{ py_module }}.cli.cli_bp)
+        self.register_blueprint({{ py_module }}.views.public)
+
+    def on_app_ready(self):
+        {{ py_module }}.ext.init_ext(self)
+
+
+@flac.cli.cli_entry({{ project_class }})
+@click.option(
+    '--with-sentry',
+    is_flag=True,
+    default=False,
+    help='Enable Sentry (usually only in production)',
+)
+def cli(scriptinfo, log_level, config_profile, with_sentry):
+    app = scriptinfo.load_app()
+    app.init_app(config_profile, log_level, with_sentry=with_sentry)

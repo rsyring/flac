@@ -40,7 +40,15 @@ Flask based library to help structure an application with an eye towards CLI app
 - pytest fixtures for app initialization
 - demo cli test that uses separate process
 
-## Develoment
+
+## Copier App Template
+
+Flac provides a [copier](https://copier.readthedocs.io) template to create the scaffold needed for a basic Flac app:
+
+`copier copy --trust gh:rsyring/flac .../projects/some-new-app-pkg`
+
+
+## Development
 
 
 ### Copier Template
