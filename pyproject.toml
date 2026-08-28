@@ -1,7 +1,6 @@
 [build-system]
 requires = [
     'hatchling',
-    'hatch-regex-commit',
 ]
 build-backend = 'hatchling.build'
 
@@ -39,11 +38,8 @@ dev = [
     {include-group = "prek"},
     {include-group = "audit"},
     {include-group = "nox"},
-    'click>=8.1.8',
-    'hatch>=1.14.0',
-    'ruff>=0.14.2',
-    # App specific:
-    # TODO: fill in app deps here
+    'click',
+    'ruff',
 ]
 # Used by nox
 pytest = [

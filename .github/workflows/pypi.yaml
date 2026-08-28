@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    name: Build project using hatch
+    name: Build project
 
     runs-on: ubuntu-latest
 
@@ -39,7 +39,7 @@ jobs:
     - uses: actions/checkout@v6
 
     - name: Install Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -48,14 +48,11 @@ jobs:
         echo "Python path `which python`"
         python --version
 
-        python -m pip install -U pip
+        python -m pip install -U pip uv
         pip --version
+        uv --version
 
-        python -m pip install hatch
-        hatch --version
-
-        echo "Project version: `hatch version`"
-        hatch build
+        uv build --out-dir tmp/dist
 
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1

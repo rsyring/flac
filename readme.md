@@ -1,7 +1,9 @@
 # Flac
+
 [![nox](https://github.com/rsyring/flac/actions/workflows/nox.yaml/badge.svg)](https://github.com/rsyring/flac/actions/workflows/nox.yaml)
 
-Flask based library to help structure an application with an eye towards CLI apps, not just web.
+Flask based library to help structure an application with an eye towards CLI apps, not
+just web.
 
 
 ## Features
@@ -31,30 +33,30 @@ Flask based library to help structure an application with an eye towards CLI app
     - fixtures to get db to ensure app context
 - Celery
     - refresh process pool
+- cli integration with the ability to customize the app's configuration using global
+  cli options
 
-
-- cli integration with the ability to customize the app's configuration using global cli options
-
-    someapp --debug --with-sentry run-some-task
-
+  `someapp --debug --with-sentry run-some-task`
 - pytest fixtures for app initialization
 - demo cli test that uses separate process
 
 
 ## Copier App Template
 
-Flac provides a [copier](https://copier.readthedocs.io) template to create the scaffold needed for a basic Flac app:
+Flac provides a [Copier](https://copier.readthedocs.io) template to create the scaffold
+needed for a basic Flac app:
 
 `copier copy --trust gh:rsyring/flac .../projects/some-new-app-pkg`
 
 
-## Development
+## Dev
 
 
 ### Copier Template
 
-Project structure and tooling mostly derives from the [Coppy](https://github.com/level12/coppy),
-see its documentation for context and additional instructions.
+Project structure and tooling mostly derives from
+[Coppy](https://github.com/level12/coppy). See its documentation for context and
+additional instructions.
 
 This project can be updated from the upstream repo, see
 [Updating a Project](https://github.com/level12/coppy?tab=readme-ov-file#template-updates).
@@ -85,16 +87,16 @@ From zero to hero (passing tests that is):
 
 ### Versions
 
-Versions are date based.  A `bump` action exists to help manage versions:
+Versions are date based. A `version` task shows and bumps versions:
 
 ```shell
 
   # Show current version
-  mise bump --show
+  mise version show
 
   # Bump version based on date, tag, and push:
-  mise bump
+  mise version bump
 
   # See other options
-  mise bump -- --help
+  mise version -- --help
 ```
