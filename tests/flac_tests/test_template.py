@@ -1,4 +1,4 @@
-from os import environ
+from os import environ, pathsep
 from pathlib import Path
 import re
 import shutil
@@ -57,6 +57,7 @@ class TestFlacTemplate:
             'copier',
             'copy',
             '--trust',
+            '--skip-tasks',
             '--overwrite',
             '--defaults',
             '--data',
@@ -98,32 +99,22 @@ class TestFlacTemplate:
         assert "build-backend = 'setuptools.build_meta'" in pyproject
         assert "'flac-standalone-app' = 'flac_standalone_app.cli:main'" in pyproject
 
-        result = self.sub_run(
-            'uv',
-            'sync',
-            '--group',
-            'pytest',
-            cwd=project_dpath,
-            env=clean_env,
-        )
-
-        self.sub_run(
-            'uv',
-            'add',
-            f'{template_source_dpath}[sqlalchemy]',
-            '--editable',
-            cwd=project_dpath,
-            env=clean_env,
-        )
+        python_paths = [
+            str(project_dpath / 'src'),
+            str(template_source_dpath / 'src'),
+        ]
+        if existing_pythonpath := clean_env.get('PYTHONPATH'):
+            python_paths.append(existing_pythonpath)
+        test_env = clean_env | {'PYTHONPATH': pathsep.join(python_paths)}
 
         result = self.sub_run(
-            '.venv/bin/python',
+            sys.executable,
             '-m',
             'pytest',
             'tests/flac_standalone_app_tests',
             '-q',
             cwd=project_dpath,
-            env=clean_env,
+            env=test_env,
         )
         assert re.search(r'\b[1-9][0-9]* passed\b', result.stdout)
 
