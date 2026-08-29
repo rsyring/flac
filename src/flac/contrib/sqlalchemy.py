@@ -206,7 +206,10 @@ class MethodsMixin:
 
         assert on_conflict_do in ('nothing', 'update')
         if on_conflict_do == 'update':
-            stmt = stmt.on_conflict_do_update(index_elements=index_elements, set_=values)
+            update_values = dict(values)
+            if 'updated_utc' in cls.__table__.columns:
+                update_values.setdefault('updated_utc', arrow.utcnow())
+            stmt = stmt.on_conflict_do_update(index_elements=index_elements, set_=update_values)
         else:
             stmt = stmt.on_conflict_do_nothing(index_elements=index_elements)
 

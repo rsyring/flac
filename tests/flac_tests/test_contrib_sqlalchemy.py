@@ -25,6 +25,38 @@ def db_clear(app: AlphaApp):
 
 
 @pytest.mark.usefixtures('db_clear')
+class TestMethodsMixin:
+    def test_upsert_conflict_refreshes_updated_utc(self):
+        original_updated_utc = arrow.get(2000, 1, 1)
+        project = Project.fake(
+            name='original',
+            updated_utc=original_updated_utc,
+        )
+
+        Project.upsert(id=project.id, name='updated', index_elements=['id'])
+        db.session.commit()
+
+        project = db.session.get(Project, project.id)
+        assert project.name == 'updated'
+        assert project.updated_utc > original_updated_utc
+
+    def test_upsert_conflict_preserves_provided_updated_utc(self):
+        project = Project.fake(name='original')
+
+        provided_updated_utc = arrow.get(2000, 1, 1)
+        Project.upsert(
+            id=project.id,
+            name='updated',
+            updated_utc=provided_updated_utc,
+            index_elements=['id'],
+        )
+        db.session.commit()
+
+        project = db.session.get(Project, project.id)
+        assert project.updated_utc == provided_updated_utc
+
+
+@pytest.mark.usefixtures('db_clear')
 class TestFakerMixin:
     def test_basics(self):
         bag = Bag.fake()
