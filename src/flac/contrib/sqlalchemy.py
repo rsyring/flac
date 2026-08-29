@@ -452,6 +452,22 @@ class FakerMixin:
         fake_kwargs: dict,
         relation_kwargs: dict,
     ):
+        if rel.direction == sa.orm.interfaces.MANYTOMANY:
+            rel_val_explicit = key in fake_kwargs
+            rel_kwargs_explicit = key in relation_kwargs
+            rel_kwargs = relation_kwargs.get(key, {})
+
+            if rel_val_explicit and rel_kwargs_explicit and fake_kwargs[key] is not cls.FAKE_IT:
+                raise ValueError(
+                    f"Value for '{key}' given but kwargs given for it also: {rel_kwargs}",
+                )
+
+            fake_related = rel_val_explicit and fake_kwargs[key] is cls.FAKE_IT
+            if fake_related or rel_kwargs_explicit:
+                fake_kwargs[key] = [rel.mapper.class_.fake(**rel_kwargs)]
+
+            return fake_kwargs
+
         rel_kwargs = relation_kwargs.get(key, {})
         rel_val_given = fake_kwargs.get(key)
         rel_required = any(not col.nullable for col in rel.local_columns)

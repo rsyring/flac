@@ -5,7 +5,19 @@ import uuid
 import arrow
 import pytest
 
-from .apps.alpha import AlphaApp, Bag, Blog, Category, Project, Task, db, delete_all
+from .apps.alpha import (
+    AlphaApp,
+    Article,
+    Bag,
+    Blog,
+    Category,
+    Project,
+    Tag,
+    Task,
+    User,
+    db,
+    delete_all,
+)
 
 
 @pytest.fixture(scope='module')
@@ -126,6 +138,28 @@ class TestFakerMixin:
 
         blog = Blog.fake(category=Category.FAKE_IT)
         assert blog.category
+
+    def test_many_to_many_relationship_not_faked_by_default(self):
+        user = User.fake(name='user')
+
+        assert user.roles == []
+
+    def test_many_to_many_fake_it_creates_collection(self):
+        article = Article.fake(title='article', tags=Article.FAKE_IT)
+
+        assert len(article.tags) == 1
+        assert isinstance(article.tags[0], Tag)
+
+    def test_many_to_many_relationship_kwargs_create_collection(self):
+        article = Article.fake(title='article', tags__name='tag')
+
+        assert len(article.tags) == 1
+        assert article.tags[0].name == 'tag'
+
+    def test_many_to_many_explicit_empty_collection_preserved(self):
+        article = Article.fake(title='article', tags=[])
+
+        assert article.tags == []
 
     def test_provided(self):
         bag = Bag.fake(name='foo')

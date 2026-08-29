@@ -45,6 +45,10 @@ _rel_cascade = 'all, delete-orphan'
 
 
 def delete_all():
+    User.delete_all()
+    Role.delete_all()
+    Article.delete_all()
+    Tag.delete_all()
     Project.delete_all()
     Bag.delete_all()
     Blog.delete_all()
@@ -114,3 +118,72 @@ class Blog(EntityMixin, db.Model):
     category = orm.relationship(Category, lazy='selectin')
 
     title = sa.Column(sa.String, nullable=False)
+
+
+user_role = sa.Table(
+    'user_role',
+    db.metadata,
+    sa.Column(
+        'user_id',
+        sa.ForeignKey('user.id', ondelete='CASCADE'),
+        primary_key=True,
+    ),
+    sa.Column(
+        'role_id',
+        sa.ForeignKey('role.id', ondelete='CASCADE'),
+        primary_key=True,
+    ),
+)
+
+
+class User(EntityMixin, db.Model):
+    __tablename__ = 'user'
+
+    name = sa.Column(sa.String, nullable=False)
+    roles = orm.relationship(
+        'Role',
+        secondary=user_role,
+        back_populates='users',
+        lazy='selectin',
+    )
+
+
+class Role(EntityMixin, db.Model):
+    __tablename__ = 'role'
+
+    name = sa.Column(sa.String, nullable=False)
+    users = orm.relationship(
+        User,
+        secondary=user_role,
+        back_populates='roles',
+        lazy='selectin',
+    )
+
+
+article_tag = sa.Table(
+    'article_tag',
+    db.metadata,
+    sa.Column(
+        'article_id',
+        sa.ForeignKey('article.id', ondelete='CASCADE'),
+        primary_key=True,
+    ),
+    sa.Column(
+        'tag_id',
+        sa.ForeignKey('tag.id', ondelete='CASCADE'),
+        primary_key=True,
+    ),
+)
+
+
+class Article(EntityMixin, db.Model):
+    __tablename__ = 'article'
+
+    title = sa.Column(sa.String, nullable=False)
+    tags = orm.relationship('Tag', secondary=article_tag, lazy='selectin')
+
+
+class Tag(EntityMixin, db.Model):
+    __tablename__ = 'tag'
+
+    name = sa.Column(sa.String, nullable=False)
