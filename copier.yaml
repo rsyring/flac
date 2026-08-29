@@ -54,7 +54,6 @@ _tasks:
       - uv
       - add
       - flask-flac[sqlalchemy]
-      - gunicorn
     when: "{{ _copier_operation == 'copy' }}"
   - command:
       - env
