@@ -91,7 +91,13 @@ def cli_entry(flac_app_cls):
             '--log-debug',
             'log_level',
             flag_value='debug',
-            help='Show debug level log messages',
+            help="Set the app's logger to debug level",
+        )(wrapped)
+        wrapped = click.option(
+            '--log-debug-root',
+            'log_level',
+            flag_value='debug-root',
+            help='Set the root logger to debug level',
         )(wrapped)
         wrapped = click.option('--config-profile', help='Name of configuration profile to load')(
             wrapped,

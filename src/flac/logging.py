@@ -12,11 +12,14 @@ LOG_STDOUT_FORMAT_STR_DEBUG = '%(levelname)s - %(name)s - %(message)s'
 
 def init_logging(level, appname):
     root_logger = logging.getLogger()
+    app_logger = logging.getLogger(appname)
 
-    minimum_level = logging.DEBUG if level == 'debug' else logging.INFO
-    root_logger.setLevel(minimum_level)
+    root_level = logging.DEBUG if level == 'debug-root' else logging.INFO
+    root_logger.setLevel(root_level)
+    app_logger.setLevel(logging.DEBUG if level == 'debug' else logging.NOTSET)
 
-    init_stdout_logging(root_logger, level)
+    stdout_level = 'debug' if level in ('debug', 'debug-root') else level
+    init_stdout_logging(root_logger, stdout_level)
 
 
 def init_stdout_logging(logger, level):

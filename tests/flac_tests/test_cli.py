@@ -39,9 +39,18 @@ def cli():
 
 
 class TestFlacGroup:
-    def test_log_level_opt(self, cli):
-        result = CliRunner().invoke(cli, ['--log-quiet', 'hello'], catch_exceptions=False)
-        assert 'log level: quiet' in result.output
+    @pytest.mark.parametrize(
+        ('option', 'level'),
+        [
+            ('--log-quiet', 'quiet'),
+            ('--log-info', 'info'),
+            ('--log-debug', 'debug'),
+            ('--log-debug-root', 'debug-root'),
+        ],
+    )
+    def test_log_level_opt(self, cli, option, level):
+        result = CliRunner().invoke(cli, [option, 'hello'], catch_exceptions=False)
+        assert f'log level: {level}' in result.output
 
     def test_hello_and_defaults(self, cli):
         result = CliRunner().invoke(cli, ['hello'], catch_exceptions=False)
